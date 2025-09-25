@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background -->
+    <color name="colorBackground">#F4F9FF</color>
+
+    <!-- Primary Gradient -->
+    <color name="colorPrimaryStart">#4FACFE</color>
+    <color name="colorPrimaryEnd">#00F2FE</color>
+
+    <!-- Card Background -->
+    <color name="colorCardBackground">#FFFFFF</color>
+
+    <!-- Text Colors -->
+    <color name="colorTextPrimary">#1A1A2E</color>
+    <color name="colorTextSecondary">#6C757D</color>
+
+    <!-- Icons & Highlights -->
+    <color name="colorHighlight">#007BFF</color>
+
+    <!-- Accent (Optional) -->
+    <color name="colorAccent">#2685D7</color>
+
+    <!-- Other Colors -->
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorTransparent">#00000000</color>
+    <color name="colorDarkBlue">#004085</color>
+    <color name="colorGrey">#9E9E9E</color>
+    <color name="colorLightGrey">#C8C8C8</color>
+    <color name="colorDarkGrey">#565656</color>
+    <color name="colorLightBlue">#90D5FF</color>
+    <color name="colorErrorRed">#D32F2F</color>
+</resources>

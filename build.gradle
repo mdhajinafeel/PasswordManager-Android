@@ -1,0 +1,17 @@
+// Top-level build file
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Hilt plugin (optional if using plugins block in module)
+        classpath libs.hilt.android.gradle.plugin
+        classpath libs.google.services
+    }
+}
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+    id("com.google.dagger.hilt.android") version "2.51" apply false
+}

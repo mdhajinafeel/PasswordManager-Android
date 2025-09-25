@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Password Manager</string>
+
+    <!-- LOGIN / SIGNUP -->
+    <string name="login">Log In</string>
+    <string name="signup">Sign Up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="name">Name</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="get_started">Get Started</string>
+    <string name="create_account_desc">Create an account or log in to explore about our app</string>
+    <string name="text_or">Or</string>
+    <string name="login1">Login</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="signup1">Signup</string>
+</resources>

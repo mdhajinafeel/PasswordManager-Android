@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "551139172037",
+    "project_id": "passwordmananger-android",
+    "storage_bucket": "passwordmananger-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551139172037:android:424d859f71a4fd8587daac",
+        "android_client_info": {
+          "package_name": "com.nprotech.passwordmanager.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "551139172037-dv1pommchlfba9aat80u9dr4d4fo0e1m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nprotech.passwordmanager.debug",
+            "certificate_hash": "f2194c405999cded36bff3efa49bbc1f7e1065af"
+          }
+        },
+        {
+          "client_id": "551139172037-hsvrrs9gtb08ibvm5prvmjm6371ejlee.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN5oWuWXPRqJGd2ctFLXTqG_HR8-v4apo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "551139172037-hsvrrs9gtb08ibvm5prvmjm6371ejlee.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
