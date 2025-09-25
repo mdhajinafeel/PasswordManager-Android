@@ -19,3 +19,43 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ==============================
+# Firebase Authentication
+# ==============================
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+# Keep annotations and signatures required by Firebase
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# ==============================
+# Google Sign-In
+# ==============================
+-keep class com.google.android.gms.auth.api.signin.** { *; }
+-keep class com.google.android.gms.common.api.** { *; }
+-keep class com.google.android.gms.common.internal.** { *; }
+
+# ==============================
+# Credential Manager / Identity APIs (API 31+)
+# ==============================
+-keep class androidx.credentials.** { *; }
+-keep class com.google.android.libraries.identity.googleid.** { *; }
+
+# ==============================
+# OkHttp & Gson (used internally by Firebase)
+# ==============================
+-keep class okhttp3.** { *; }
+-keep class okio.** { *; }
+-keep class com.google.gson.** { *; }
+
+# ==============================
+# Optional: Suppress warnings
+# ==============================
+-dontwarn com.google.android.gms.**
+-dontwarn com.google.firebase.**
+-dontwarn androidx.credentials.**
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn com.google.gson.**

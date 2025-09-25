@@ -20,6 +20,8 @@ android {
 
     buildTypes {
         debug {
+            minifyEnabled false
+            shrinkResources false
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
             buildConfigField "String", "BASE_URL", "\"https://dev-api.yourapp.com/api/\""
@@ -27,7 +29,8 @@ android {
             buildConfigField "String", "BASIC_AUTH_PASSWORD", "\"password\""
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "String", "BASE_URL", "\"https://api.yourapp.com/api/\""
             buildConfigField "String", "BASIC_AUTH_CLIENT", "\"client\""
@@ -84,6 +87,7 @@ dependencies {
     implementation libs.hilt.android
     annotationProcessor libs.hilt.compiler
 
+    //Firebase Auth - Google
     implementation libs.firebase.auth
     implementation libs.play.services.auth
 }
