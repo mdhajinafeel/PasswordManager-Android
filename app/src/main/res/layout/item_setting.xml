@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutSetting"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:orientation="horizontal"
+    android:padding="@dimen/padding_15">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/margin_16" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:fontFamily="@font/exo2_medium"
+        android:gravity="center_vertical"
+        android:textColor="@color/colorDarkBlue"
+        android:textSize="@dimen/text_14" />
+
+    <com.github.angads25.toggle.widget.LabeledSwitch
+        android:id="@+id/toggleSwitch"
+        android:layout_width="50dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_marginBottom="@dimen/margin_10"
+        android:fontFamily="@font/exo2_semibold"
+        android:textSize="@dimen/text_10"
+        android:visibility="gone"
+        app:colorBorder="@color/colorTransparent"
+        app:colorOff="@color/colorLightBlue"
+        app:colorOn="@color/colorDarkBlue"
+        app:on="false"
+        app:textOff=""
+        app:textOn="" />
+
+    <RelativeLayout
+        android:id="@+id/downloadContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_6"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivExcel"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_toEndOf="@+id/ivPdf"
+            android:src="@drawable/ic_excel" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivPdf"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="@dimen/margin_15"
+            android:src="@drawable/ic_pdf" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/spinnerContainer"
+        android:layout_width="140dp"
+        android:layout_height="36dp"
+        android:layout_margin="@dimen/margin_6"
+        android:background="@drawable/spinner_box_bg"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.AppCompatSpinner
+            android:id="@+id/syncInterval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/ivIcon"
+            android:background="@android:color/transparent"
+            android:popupBackground="@color/colorDimBlue"
+            android:spinnerMode="dropdown" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_drop_down" />
+    </RelativeLayout>
+</LinearLayout>

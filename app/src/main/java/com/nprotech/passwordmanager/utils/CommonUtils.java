@@ -1,9 +1,27 @@
 package com.nprotech.passwordmanager.utils;
 
 import java.security.SecureRandom;
+import java.util.Calendar;
+import java.util.concurrent.ThreadLocalRandom;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Typeface;
+import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.util.Base64;
 
+import com.nprotech.passwordmanager.helper.PreferenceManager;
+
 public class CommonUtils {
+
+    public static final int masterApiId = 1;
+    public static final String masterApiName = "Download Master";
+    public static final int syncApiId = 2;
+    public static final String syncApiName = "Sync Data";
 
     public static String generateNonce(int length) {
         SecureRandom secureRandom = new SecureRandom();
@@ -12,5 +30,65 @@ public class CommonUtils {
 
         // Use android.util.Base64 to support all SDK versions
         return Base64.encodeToString(nonceBytes, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+    }
+
+    @SuppressLint("HardwareIds")
+    public static String getDeviceId(Context context) {
+        return Settings.Secure.getString(
+                context.getContentResolver(),
+                Settings.Secure.ANDROID_ID
+        );
+    }
+
+    public static String getAppVersionName(Context context) {
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            AppLogger.e(context.getClass(), "getAppVersionName", e);
+            return "";
+        }
+    }
+    public static long getAppVersionCode(Context context) {
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            AppLogger.e(context.getClass(), "getAppVersionCode", e);
+            return -1;
+        }
+    }
+    public static SpannableString customFontTypeFace(Typeface typeface, CharSequence chars) {
+        if (chars == null) {
+            return null;
+        }
+        SpannableString s = new SpannableString(chars);
+        s.setSpan(new CustomTypefaceSpan("", typeface), 0, s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return s;
+    }
+
+    public static boolean getLoginExpiry(long loginExpiry) {
+        boolean timeStatus = false;
+        if (loginExpiry > 0) {
+            long currentTimeInMilliseconds = System.currentTimeMillis();
+            long differenceBetweenTimes = loginExpiry - currentTimeInMilliseconds;
+            timeStatus = differenceBetweenTimes <= 0;
+        }
+        return timeStatus;
+    }
+
+    public static Long getCurrentDateTimeStamp(boolean isRandomRequired) {
+        long timestamp = Calendar.getInstance().getTimeInMillis();
+        long random = 0;
+
+        if(isRandomRequired) {
+            random = 10000 + ThreadLocalRandom.current().nextLong(1000, 9999); // 4-digit random
+        }
+
+        return timestamp + random; // Combine for unique long
+    }
+
+    public static String getPasswordAlias() {
+        return "pm_master_key_" + PreferenceManager.INSTANCE.getSecretKey();
     }
 }

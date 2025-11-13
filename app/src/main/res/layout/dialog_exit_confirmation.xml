@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="240dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="@dimen/padding_24"
+    android:background="@drawable/dialog_background"
+    android:gravity="center">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        app:srcCompat="@drawable/ic_lock"  />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/margin_5"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:text="@string/password_manager_is_locked"
+        android:fontFamily="@font/exo2_semibold"
+        android:textSize="@dimen/text_14" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_marginTop="@dimen/margin_5"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:text="@string/for_your_security_you_can_use_only_when_it_s_unlocked"
+        android:fontFamily="@font/exo2_medium"
+        android:textSize="@dimen/text_12" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:weightSum="2">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:text="@string/text_cancel"
+            android:layout_marginEnd="@dimen/margin_15"
+            android:fontFamily="@font/exo2_semibold"
+            android:textSize="@dimen/text_12" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvUnlock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:text="@string/text_unlock"
+            android:fontFamily="@font/exo2_semibold"
+            android:textSize="@dimen/text_12" />
+    </LinearLayout>
+</LinearLayout>

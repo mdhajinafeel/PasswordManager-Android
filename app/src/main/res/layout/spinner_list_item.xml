@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvSpinnerItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fontFamily="@font/exo2_semibold"
+    android:gravity="center_vertical"
+    android:padding="@dimen/padding_10"
+    android:textColor="@color/colorDarkBlue"
+    android:background="@color/colorTransparent"
+    android:textSize="@dimen/text_12" />

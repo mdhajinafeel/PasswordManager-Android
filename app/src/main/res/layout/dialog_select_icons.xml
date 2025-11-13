@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/card_corner_radius_verysmall"
+    app:cardElevation="@dimen/corner_elevation_low"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite">
+
+        <LinearLayout
+            android:id="@+id/layoutTop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorVeryDimBlue"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorDimGrey"
+                android:padding="@dimen/padding_10">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDialogHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="@font/exo2_semibold"
+                    android:text="@string/icons"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/text_14" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/ivDialogClose"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/ic_close_black" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etDialogSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/margin_10"
+                    android:background="@drawable/bg_edittext"
+                    android:cursorVisible="true"
+                    android:drawableStart="@drawable/ic_search_grey"
+                    android:drawablePadding="@dimen/padding_10"
+                    android:fontFamily="@font/exo2_medium"
+                    android:gravity="start|center_vertical"
+                    android:imeOptions="actionSearch"
+                    android:padding="@dimen/padding_10"
+                    android:singleLine="true"
+                    android:textColor="@color/colorDarkGrey"
+                    android:textColorHint="@color/colorLightGrey"
+                    android:textCursorDrawable="@null"
+                    android:textSize="@dimen/text_10"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDialogIcons"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:layout_margin="@dimen/margin_10"
+                android:clipToPadding="true"
+                android:isScrollContainer="true"
+                android:nestedScrollingEnabled="true"
+                android:visibility="visible"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="4"
+                tools:listitem="@layout/row_item_icon" />
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDialogCustomIcons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layoutTop"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:fontFamily="@font/exo2_bold"
+            android:padding="@dimen/padding_10"
+            android:text="@string/custom_icons"
+            android:textColor="@color/colorDarkBlue"
+            android:textSize="@dimen/text_12" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

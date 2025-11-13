@@ -2,32 +2,57 @@
 <resources>
 
     <!-- MARGINS -->
+    <dimen name="margin_2">2dp</dimen>
     <dimen name="margin_5">5dp</dimen>
+    <dimen name="margin_6">6dp</dimen>
+    <dimen name="margin_8">8dp</dimen>
     <dimen name="margin_10">10dp</dimen>
     <dimen name="margin_12">12dp</dimen>
     <dimen name="margin_15">15dp</dimen>
+    <dimen name="margin_16">16dp</dimen>
     <dimen name="margin_20">20dp</dimen>
     <dimen name="margin_25">25dp</dimen>
+    <dimen name="margin_30">30dp</dimen>
+    <dimen name="margin_35">35dp</dimen>
+    <dimen name="margin_70">70dp</dimen>
 
     <!-- PADDINGS -->
+    <dimen name="padding_0">0dp</dimen>
+    <dimen name="padding_2">2dp</dimen>
     <dimen name="padding_4">4dp</dimen>
     <dimen name="padding_5">5dp</dimen>
+    <dimen name="padding_8">8dp</dimen>
     <dimen name="padding_10">10dp</dimen>
     <dimen name="padding_15">15dp</dimen>
+    <dimen name="padding_16">16dp</dimen>
     <dimen name="padding_20">20dp</dimen>
+    <dimen name="padding_24">24dp</dimen>
     <dimen name="padding_25">25dp</dimen>
 
     <!-- HEIGHT -->
     <dimen name="form_card_height">540dp</dimen>
     <dimen name="layout_0">0dp</dimen>
     <dimen name="layout_40">40dp</dimen>
+    <dimen name="layout_180">180dp</dimen>
 
     <!-- TEXT SIZE -->
+    <dimen name="text_08">8sp</dimen>
     <dimen name="text_10">10sp</dimen>
     <dimen name="text_12">12sp</dimen>
     <dimen name="text_14">14sp</dimen>
     <dimen name="text_16">16sp</dimen>
+    <dimen name="text_18">18sp</dimen>
     <dimen name="text_26">26sp</dimen>
     <dimen name="text_28">28sp</dimen>
     <dimen name="text_30">30sp</dimen>
+
+    <!-- Elevation -->
+    <dimen name="corner_elevation_small">5dp</dimen>
+    <dimen name="corner_elevation_medium">10dp</dimen>
+    <dimen name="card_corner_radius_verysmall">8dp</dimen>
+    <dimen name="corner_elevation_low">4dp</dimen>
+
+    <!-- Corner Radius -->
+    <dimen name="corner_radius_8">8dp</dimen>
+    <dimen name="corner_radius_16">16dp</dimen>
 </resources>

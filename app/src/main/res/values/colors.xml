@@ -27,7 +27,19 @@
     <color name="colorDarkBlue">#004085</color>
     <color name="colorGrey">#9E9E9E</color>
     <color name="colorLightGrey">#C8C8C8</color>
+    <color name="colorVeryLightGrey">#E2E2E2</color>
+    <color name="colorDimGrey">#EFEFEF</color>
     <color name="colorDarkGrey">#565656</color>
     <color name="colorLightBlue">#90D5FF</color>
+    <color name="colorDimBlue">#DBEBFF</color>
+    <color name="colorVeryDimBlue">#F2F7FF</color>
     <color name="colorErrorRed">#D32F2F</color>
+    <color name="colorMilkWhite">#F8F8FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="weakColor">#F44336</color>
+    <color name="mediumColor">#FF9800</color>
+    <color name="strongColor">#4CAF50</color>
+    <color name="veryStrongColor">#2E7D32</color>
 </resources>

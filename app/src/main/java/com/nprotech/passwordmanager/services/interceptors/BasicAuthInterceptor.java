@@ -13,7 +13,6 @@ import okhttp3.Response;
 public class BasicAuthInterceptor implements Interceptor {
 
     private final String credentials;
-
     public BasicAuthInterceptor(String username, String password) {
         String auth = username + ":" + password;
         this.credentials = "Basic " + Base64.encodeToString(auth.getBytes(), Base64.NO_WRAP);

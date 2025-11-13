@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/colorWhite"
+    android:elevation="@dimen/corner_elevation_medium"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txtTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/exo2_semibold"
+        android:textColor="@color/colorBlack"
+        android:textSize="@dimen/text_16" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivAddPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:layout_margin="@dimen/margin_2"
+        android:contentDescription="@string/app_name"
+        android:padding="@dimen/padding_10"
+        android:src="@drawable/ic_add"
+        app:tint="@null" />
+
+
+</androidx.appcompat.widget.Toolbar>

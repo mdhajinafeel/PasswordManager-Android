@@ -2,6 +2,7 @@ package com.nprotech.passwordmanager.utils;
 
 import android.util.Log;
 
+@SuppressWarnings("unused")
 public class AppLogger {
 
     public static void d(Class<?> cls, String message) {

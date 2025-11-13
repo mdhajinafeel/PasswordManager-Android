@@ -1,29 +1,35 @@
 package com.nprotech.passwordmanager.view.activities;
 
+import static android.widget.Toast.LENGTH_SHORT;
+
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
-import com.google.android.gms.auth.api.identity.BeginSignInResult;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -31,25 +37,38 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.nprotech.passwordmanager.R;
+import com.nprotech.passwordmanager.common.BaseActivity;
+import com.nprotech.passwordmanager.helper.PreferenceManager;
+import com.nprotech.passwordmanager.model.request.LoginRequest;
+import com.nprotech.passwordmanager.model.request.SignUpRequest;
 import com.nprotech.passwordmanager.utils.AppLogger;
+import com.nprotech.passwordmanager.utils.CommonUtils;
+import com.nprotech.passwordmanager.utils.NetworkConnectivity;
+import com.nprotech.passwordmanager.viewmodel.AuthViewModel;
 
 import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+@SuppressWarnings("deprecation")
 @AndroidEntryPoint
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
+
     private AppCompatTextView tabLogin, tabSignup;
     private LinearLayout loginForm, signupForm;
     private TextInputLayout tiEmailLogin, tiPasswordLogin, tiNameSignup, tiEmailSignup, tiPasswordSignup;
     private TextInputEditText etEmailLogin, etPasswordLogin, etNameSignup, etEmailSignup, etPasswordSignup;
+    private FrameLayout progressBar;
     private Animation fadeIn, fadeOut;
     private Typeface typeFaceMedium, typeFaceBold;
-    private static final int REQ_ONE_TAP = 123;
+    private FirebaseAuth mAuth;
     private SignInClient oneTapClient;
     private BeginSignInRequest signInRequest;
-    private FirebaseAuth mAuth;
+    private static final int REQ_ONE_TAP = 1100;
+    private String fcmToken = "";
+    private AuthViewModel loginViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +90,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void initComponents() {
         try {
 
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            hideKeyboard(this);
+
+            progressBar = findViewById(R.id.progress_bar);
 
             tabLogin = findViewById(R.id.tabLogin);
             tabSignup = findViewById(R.id.tabSignup);
@@ -109,17 +130,45 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             mAuth = FirebaseAuth.getInstance();
             oneTapClient = Identity.getSignInClient(this);
-            // Configure request
+
             signInRequest = BeginSignInRequest.builder()
                     .setGoogleIdTokenRequestOptions(
                             BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                                     .setSupported(true)
-                                    .setServerClientId(getString(R.string.default_web_client_id)) // from google-services.json
-                                    .setFilterByAuthorizedAccounts(false)
+                                    .setServerClientId(getString(R.string.default_web_client_id))
+                                    .setFilterByAuthorizedAccounts(false) // false = show all accounts
                                     .build())
-                    .setAutoSelectEnabled(false) // always ask user to choose
+                    .setAutoSelectEnabled(false) // false = always show One Tap prompt
                     .build();
 
+            // Call our method to fetch token
+            getFcmToken(new FcmTokenCallback() {
+                @Override
+                public void onTokenReceived(String token) {
+                    if (token != null) {
+                        AppLogger.d(getClass(), "Token received: " + token);
+                        fcmToken = token;
+                    } else {
+                        AppLogger.w(getClass(), "Failed to get FCM token");
+                    }
+                }
+            });
+
+            loginViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
+
+            loginViewModel.getLoginStatus().observe(this, s -> {
+                if (!s) {
+                    showCustomDialog(loginViewModel.getErrorTitle(), loginViewModel.getErrorMessage(), false);
+                }
+            });
+
+            loginViewModel.getProgressState().observe(this, isProgress -> {
+                if (isProgress) {
+                    showProgress(progressBar);
+                } else {
+                    hideProgress(progressBar);
+                }
+            });
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error initializing components", e);
         }
@@ -178,25 +227,62 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void validateFieldsLogin() {
         try {
-            if (Objects.requireNonNull(etEmailLogin.getText()).toString().isEmpty()) {
-                tiEmailLogin.setError("Required Field");
-                tiEmailLogin.setErrorEnabled(true);
-            } else {
-                if (!Patterns.EMAIL_ADDRESS.matcher(Objects.requireNonNull(etEmailLogin.getText()).toString()).matches()) {
-                    tiEmailLogin.setError("Invalid email");
-                    tiEmailLogin.setErrorEnabled(true);
-                } else {
-                    tiEmailLogin.setError(null);
-                    tiEmailLogin.setErrorEnabled(false);
-                }
-            }
+            if (new NetworkConnectivity(this).isNetworkAvailable()) {
+                boolean isValid1 = true, isValid2 = true;
 
-            if (Objects.requireNonNull(etPasswordLogin.getText()).toString().isEmpty()) {
-                tiPasswordLogin.setError("Required Field");
-                tiPasswordLogin.setErrorEnabled(true);
+                if (Objects.requireNonNull(etEmailLogin.getText()).toString().isEmpty()) {
+                    tiEmailLogin.setError("Required Field");
+                    tiEmailLogin.setErrorEnabled(true);
+                    isValid1 = false;
+                } else {
+                    if (!Patterns.EMAIL_ADDRESS.matcher(Objects.requireNonNull(etEmailLogin.getText()).toString()).matches()) {
+                        tiEmailLogin.setError("Invalid email");
+                        tiEmailLogin.setErrorEnabled(true);
+                    } else {
+                        tiEmailLogin.setError(null);
+                        tiEmailLogin.setErrorEnabled(false);
+                    }
+                }
+
+                if (Objects.requireNonNull(etPasswordLogin.getText()).toString().isEmpty()) {
+                    tiPasswordLogin.setError("Required Field");
+                    tiPasswordLogin.setErrorEnabled(true);
+                    isValid2 = false;
+                } else {
+                    tiPasswordLogin.setError(null);
+                    tiPasswordLogin.setErrorEnabled(false);
+                }
+
+                if (isValid1 && isValid2) {
+                    LoginRequest loginRequest = new LoginRequest();
+                    loginRequest.setEmail(etEmailLogin.getText().toString());
+                    loginRequest.setPassword(etPasswordLogin.getText().toString());
+                    loginRequest.setGoogleLogin(false);
+                    loginRequest.setFcmToken(fcmToken);
+                    loginRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
+                    loginRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
+
+                    loginViewModel.login(loginRequest);
+
+                    loginViewModel.getLoginResult().observe(this, loginResponse -> {
+
+                        PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
+                        PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
+                        PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
+                        PreferenceManager.INSTANCE.setRefreshTokenExpiry(loginResponse.getRefreshExpiresAt());
+                        PreferenceManager.INSTANCE.setName(loginResponse.getUser().getName());
+                        PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
+                        PreferenceManager.INSTANCE.setLoggedIn(true);
+                        PreferenceManager.INSTANCE.setGoogleSignIn(false);
+                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+
+                        startActivity(new Intent(this, MainActivity.class)
+                                .putExtra("isFromLogin", true)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    });
+                }
             } else {
-                tiPasswordLogin.setError(null);
-                tiPasswordLogin.setErrorEnabled(false);
+                showCustomDialog(getString(R.string.information), getString(R.string.internet_not_available), false);
             }
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error validateFieldsLogin", e);
@@ -206,33 +292,74 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void validateFieldsSignup() {
         try {
 
-            if (Objects.requireNonNull(etNameSignup.getText()).toString().isEmpty()) {
-                tiNameSignup.setError("Required Field");
-                tiNameSignup.setErrorEnabled(true);
-            } else {
-                tiNameSignup.setError(null);
-                tiNameSignup.setErrorEnabled(false);
-            }
+            if (new NetworkConnectivity(this).isNetworkAvailable()) {
 
-            if (Objects.requireNonNull(etEmailSignup.getText()).toString().isEmpty()) {
-                tiEmailSignup.setError("Required Field");
-                tiEmailSignup.setErrorEnabled(true);
-            } else {
-                if (!Patterns.EMAIL_ADDRESS.matcher(Objects.requireNonNull(etEmailSignup.getText()).toString()).matches()) {
-                    tiEmailSignup.setError("Invalid email");
-                    tiEmailSignup.setErrorEnabled(true);
+
+                boolean isValid1 = true, isValid2 = true, isValid3 = true;
+
+                if (Objects.requireNonNull(etNameSignup.getText()).toString().isEmpty()) {
+                    tiNameSignup.setError(getString(R.string.required_field));
+                    tiNameSignup.setErrorEnabled(true);
+                    isValid1 = false;
                 } else {
-                    tiEmailSignup.setError(null);
-                    tiEmailSignup.setErrorEnabled(false);
+                    tiNameSignup.setError(null);
+                    tiNameSignup.setErrorEnabled(false);
                 }
-            }
 
-            if (Objects.requireNonNull(etPasswordSignup.getText()).toString().isEmpty()) {
-                tiPasswordSignup.setError("Required Field");
-                tiPasswordSignup.setErrorEnabled(true);
+                if (Objects.requireNonNull(etEmailSignup.getText()).toString().isEmpty()) {
+                    tiEmailSignup.setError(getString(R.string.required_field));
+                    tiEmailSignup.setErrorEnabled(true);
+                    isValid2 = false;
+                } else {
+                    if (!Patterns.EMAIL_ADDRESS.matcher(Objects.requireNonNull(etEmailSignup.getText()).toString()).matches()) {
+                        tiEmailSignup.setError("Invalid email");
+                        tiEmailSignup.setErrorEnabled(true);
+                    } else {
+                        tiEmailSignup.setError(null);
+                        tiEmailSignup.setErrorEnabled(false);
+                    }
+                }
+
+                if (Objects.requireNonNull(etPasswordSignup.getText()).toString().isEmpty()) {
+                    tiPasswordSignup.setError(getString(R.string.required_field));
+                    tiPasswordSignup.setErrorEnabled(true);
+                    isValid3 = false;
+                } else {
+                    tiPasswordSignup.setError(null);
+                    tiPasswordSignup.setErrorEnabled(false);
+                }
+
+                if (isValid1 && isValid2 && isValid3) {
+                    SignUpRequest signUpRequest = new SignUpRequest();
+                    signUpRequest.setName(etNameSignup.getText().toString());
+                    signUpRequest.setEmail(etEmailSignup.getText().toString());
+                    signUpRequest.setPassword(etPasswordSignup.getText().toString());
+                    signUpRequest.setGoogle(false);
+                    signUpRequest.setFcmToken(fcmToken);
+                    signUpRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
+                    signUpRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
+
+                    loginViewModel.register(signUpRequest);
+
+                    loginViewModel.getLoginResult().observe(this, loginResponse -> {
+
+                        PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
+                        PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
+                        PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
+                        PreferenceManager.INSTANCE.setRefreshTokenExpiry(loginResponse.getRefreshExpiresAt());
+                        PreferenceManager.INSTANCE.setName(loginResponse.getUser().getName());
+                        PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
+                        PreferenceManager.INSTANCE.setLoggedIn(true);
+                        PreferenceManager.INSTANCE.setGoogleSignIn(false);
+                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+
+                        startActivity(new Intent(this, MainActivity.class)
+                                .putExtra("isFromLogin", true)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                    });
+                }
             } else {
-                tiPasswordSignup.setError(null);
-                tiPasswordSignup.setErrorEnabled(false);
+                showCustomDialog(getString(R.string.information), getString(R.string.internet_not_available), false);
             }
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error validateFieldsSignup", e);
@@ -241,37 +368,39 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void signInWithGoogle() {
         try {
-            oneTapClient.beginSignIn(signInRequest)
-                    .addOnSuccessListener(this, new OnSuccessListener<>() {
-                        @Override
-                        public void onSuccess(BeginSignInResult result) {
+
+            if (new NetworkConnectivity(this).isNetworkAvailable()) {
+                showProgress(progressBar);
+                oneTapClient.beginSignIn(signInRequest)
+                        .addOnSuccessListener(this, result -> {
                             try {
+                                hideProgress(progressBar);
                                 startIntentSenderForResult(
                                         result.getPendingIntent().getIntentSender(),
                                         REQ_ONE_TAP,
                                         null,
-                                        0,
-                                        0,
-                                        0
+                                        0, 0, 0
                                 );
                             } catch (Exception e) {
-                                AppLogger.e(getClass(), "Error starting One Tap: ", e);
+                                AppLogger.e(getClass(), "Error signInWithGoogle", e);
+                                fallbackGoogleSignIn();
                             }
-                        }
-                    })
-                    .addOnFailureListener(this, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            AppLogger.e(getClass(), "No saved credentials, use manual sign-in: ", e);
-                        }
-                    });
+                        })
+                        .addOnFailureListener(this, e -> {
+                            AppLogger.e(getClass(), "One Tap failed", e);
+                            fallbackGoogleSignIn();
+                        });
+            } else {
+                showCustomDialog(getString(R.string.information), getString(R.string.internet_not_available), false);
+            }
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error getting signInWithGoogle: ", e);
+            fallbackGoogleSignIn();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQ_ONE_TAP) {
@@ -279,22 +408,99 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
                 String idToken = credential.getGoogleIdToken();
                 if (idToken != null) {
-                    AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
-                    mAuth.signInWithCredential(firebaseCredential)
-                            .addOnCompleteListener(this, task -> {
-                                if (task.isSuccessful()) {
-                                    FirebaseUser user = mAuth.getCurrentUser();
-                                    if (user != null) {
-                                        Toast.makeText(this, "Signed in as " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    AppLogger.e(getClass(), "Sign-in failed", task.getException());
-                                }
-                            });
+                    firebaseAuthWithGoogle(idToken);
                 }
-            } catch (Exception e) {
-                AppLogger.e(getClass(), "Failed to get credential: ", e);
+            } catch (ApiException e) {
+                AppLogger.e(getClass(), "Error onActivityResult", e);
+                Toast.makeText(this, "One Tap sign-in failed: " + e.getMessage(), LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        showProgress(progressBar);
+        AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(firebaseCredential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+
+                            SignUpRequest signUpRequest = new SignUpRequest();
+                            signUpRequest.setName(user.getDisplayName());
+                            signUpRequest.setEmail(user.getEmail());
+                            signUpRequest.setPassword("");
+                            signUpRequest.setGoogle(true);
+                            signUpRequest.setFcmToken(fcmToken);
+                            signUpRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
+                            signUpRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
+
+                            loginViewModel.register(signUpRequest);
+
+                            loginViewModel.getLoginResult().observe(this, loginResponse -> {
+
+                                PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
+                                PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
+                                PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
+                                PreferenceManager.INSTANCE.setRefreshTokenExpiry(loginResponse.getRefreshExpiresAt());
+                                PreferenceManager.INSTANCE.setName(loginResponse.getUser().getName());
+                                PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
+                                PreferenceManager.INSTANCE.setLoggedIn(true);
+                                PreferenceManager.INSTANCE.setGoogleSignIn(true);
+                                PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+
+                                startActivity(new Intent(this, MainActivity.class)
+                                        .putExtra("isFromLogin", true)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                            });
+                        }
+                    } else {
+                        Toast.makeText(this, "Authentication failed: " + Objects.requireNonNull(task.getException()).getMessage(), LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void fallbackGoogleSignIn() {
+        try {
+            hideProgress(progressBar);
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
+
+            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, gso);
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, REQ_ONE_TAP);
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error fallbackGoogleSignIn", e);
+        }
+    }
+
+    private void getFcmToken(FcmTokenCallback callback) {
+        try {
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnCompleteListener(new OnCompleteListener<>() {
+                        @Override
+                        public void onComplete(@NonNull Task<String> task) {
+                            if (!task.isSuccessful()) {
+                                AppLogger.e(getClass(), "Fetching FCM registration token failed", task.getException());
+                                callback.onTokenReceived(null);
+                                return;
+                            }
+
+                            // Get new FCM registration token
+                            String token = task.getResult();
+                            AppLogger.d(getClass(), "FCM Token: " + token);
+                            callback.onTokenReceived(token);
+                        }
+                    });
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error while fetching FCM token", e);
+            callback.onTokenReceived(null);
+        }
+    }
+
+    public interface FcmTokenCallback {
+        void onTokenReceived(String token);
     }
 }

@@ -5,17 +5,28 @@ plugins {
 
 android {
     namespace 'com.nprotech.passwordmanager'
-    compileSdk 35
+    compileSdkVersion 36
 
     defaultConfig {
         applicationId "com.nprotech.passwordmanager"
-        minSdk 23
-        targetSdk 35
+        minSdkVersion 23
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
 
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation": "$projectDir/schemas".toString(),
+                        "room.incremental": "true"
+                ]
+            }
+        }
+
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
@@ -24,9 +35,9 @@ android {
             shrinkResources false
             applicationIdSuffix ".debug"
             versionNameSuffix "-debug"
-            buildConfigField "String", "BASE_URL", "\"https://dev-api.yourapp.com/api/\""
-            buildConfigField "String", "BASIC_AUTH_CLIENT", "\"client\""
-            buildConfigField "String", "BASIC_AUTH_PASSWORD", "\"password\""
+            buildConfigField "String", "BASE_URL", "\"https://pwdmanager-dev.procampoflorestal.com/api/\""
+            buildConfigField "String", "BASIC_AUTH_CLIENT", "\"nprotechpasswordmanagerapp\""
+            buildConfigField "String", "BASIC_AUTH_PASSWORD", "\"U{#q;cy7GajDr;H[UEKPIoq#+OLBCB4Ga;TjpQCpOrp^A!_;,=\""
         }
         release {
             minifyEnabled true
@@ -41,6 +52,7 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+        dataBinding true
     }
 
     compileOptions {
@@ -48,6 +60,12 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     buildToolsVersion '36.1.0'
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
@@ -60,8 +78,12 @@ dependencies {
     implementation libs.room.runtime
     annotationProcessor libs.room.compiler
 
+    // SQL Cipher
+    implementation libs.android.database.sqlcipher
+    implementation libs.sqlite
+
     // Security
-    implementation libs.security.crypto
+    implementation libs.security.crypto.v110alpha04
 
     // Biometric
     implementation libs.biometric
@@ -87,9 +109,27 @@ dependencies {
     implementation libs.hilt.android
     annotationProcessor libs.hilt.compiler
 
-    //Firebase Auth - Google
+    //Firebase + Google
     implementation libs.firebase.auth
+    implementation libs.firebase.messaging
     implementation libs.play.services.auth
+
+    //Bottom Navigation
+    implementation libs.curvedbottomnavigation
+
+    //Progress Animation
+    implementation libs.lottie
+
+    //Toggle
+    implementation libs.toggle
+
+    //Biometric
+    implementation libs.biometric
+
+    implementation "androidx.hilt:hilt-work:1.2.0"
+    annotationProcessor "androidx.hilt:hilt-compiler:1.2.0"
+    implementation "androidx.work:work-runtime:2.9.0"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

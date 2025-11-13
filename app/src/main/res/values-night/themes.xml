@@ -15,7 +15,8 @@
         <item name="android:windowBackground">@color/colorBackground</item>
 
         <!-- Status bar color -->
-        <item name="android:statusBarColor">@color/colorPrimaryEnd</item>
+        <item name="android:statusBarColor">@color/colorHighlight</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/colorBackground</item>
 
         <!-- Fix for TextInputLayout hints & password toggle -->

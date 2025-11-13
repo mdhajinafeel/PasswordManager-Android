@@ -1,0 +1,100 @@
+package com.nprotech.passwordmanager.common;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
+
+import com.google.android.material.button.MaterialButton;
+import com.nprotech.passwordmanager.R;
+import com.nprotech.passwordmanager.helper.PreferenceManager;
+import com.nprotech.passwordmanager.view.activities.LoginActivity;
+import com.nprotech.passwordmanager.work.WorkScheduler;
+
+public class BaseActivity extends AppCompatActivity {
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    public void showProgress(FrameLayout progressBar) {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgress(FrameLayout progressBar) {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        progressBar.setVisibility(View.GONE);
+    }
+
+    public void hideKeyboard(Context ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        View v = ((Activity) ctx).getCurrentFocus();
+        if (v == null)
+            return;
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    public void showCustomDialog(String header, String body, boolean isCancel) {
+        // Inflate the custom layout
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.custom_dialog, null);
+
+        // Find views
+        AppCompatTextView tvHeader = view.findViewById(R.id.dialogHeader);
+        AppCompatTextView tvBody = view.findViewById(R.id.dialogBody);
+        MaterialButton btnOk = view.findViewById(R.id.btnOk);
+        MaterialButton btnCancel = view.findViewById(R.id.btnCancel);
+
+        // Set texts
+        tvHeader.setText(header);
+        tvBody.setText(body);
+
+        if(isCancel) {
+            btnCancel.setVisibility(View.VISIBLE);
+        } else {
+            btnCancel.setVisibility(View.GONE);
+        }
+
+        // Build dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(view);
+        builder.setCancelable(false);
+
+        AlertDialog dialog = builder.create();
+
+        // Button click listeners
+        btnOk.setOnClickListener(v -> dialog.dismiss());
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        // Show dialog
+        dialog.show();
+    }
+
+    public void performLogout(Context context) {
+        PreferenceManager.INSTANCE.clearLoginSession();
+
+        WorkScheduler.cancelSyncWork(context);
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+}

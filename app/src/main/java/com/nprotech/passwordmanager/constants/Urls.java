@@ -3,5 +3,11 @@ package com.nprotech.passwordmanager.constants;
 public class Urls {
 
     //Auth
-    public static final String authUrl = "/auth";
+    public static final String authRegister = "auth/register";
+    public static final String authLogin = "auth/login";
+    public static final String authLogout = "auth/logout";
+    public static final String authRefreshToken = "auth/refreshtoken";
+
+    //Masters
+    public static final String masterDownload = "masters/downloadmasters";
 }

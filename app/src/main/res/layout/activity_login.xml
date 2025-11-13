@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:background="@drawable/bg_gradient"
     tools:context=".view.activities.LoginActivity">
 
@@ -39,7 +40,7 @@
             android:fontFamily="@font/exo2_semibold"
             android:text="@string/get_started"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/text_30" />
+            android:textSize="@dimen/text_26" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"
@@ -48,7 +49,7 @@
             android:fontFamily="@font/exo2_semibold"
             android:text="@string/create_account_desc"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/text_16" />
+            android:textSize="@dimen/text_14" />
     </LinearLayout>
 
     <LinearLayout
@@ -67,7 +68,7 @@
             android:id="@+id/tabContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/margin_16"
             android:background="@drawable/tab_background_container"
             android:gravity="center"
             android:orientation="horizontal"
@@ -112,7 +113,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_5"
-                android:hint="@string/email"
+                android:hint="@string/username_email"
                 app:boxStrokeColor="@color/colorBlack"
                 app:boxStrokeWidth="1dp"
                 app:errorEnabled="false"
@@ -126,6 +127,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/exo2_medium"
+                    android:drawableStart="@drawable/ic_email"
+                    android:drawablePadding="@dimen/padding_10"
                     android:inputType="textEmailAddress"
                     android:textColor="@color/colorBlack"
                     android:textColorHint="@color/colorGrey"
@@ -154,6 +157,8 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/exo2_medium"
                     android:inputType="textPassword"
+                    android:drawablePadding="@dimen/padding_10"
+                    android:drawableStart="@drawable/ic_password1"
                     android:textColor="@android:color/black"
                     android:textColorHint="@color/colorGrey"
                     android:textSize="@dimen/text_16" />
@@ -196,18 +201,20 @@
                 android:layout_height="48dp"
                 android:layout_marginTop="@dimen/margin_12"
                 android:background="@drawable/btn_gradient"
+                android:elevation="0dp"
                 android:fontFamily="@font/exo2_semibold"
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp"
+                android:paddingTop="@dimen/padding_0"
+                android:paddingBottom="@dimen/padding_0"
                 android:text="@string/login1"
+                android:stateListAnimator="@null"
                 android:textColor="@color/colorWhite"
-                android:textSize="@dimen/text_12"
+                android:textSize="@dimen/text_14"
                 app:backgroundTint="@null"
-                app:cornerRadius="8dp"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:minHeight="0dp"
-                app:rippleColor="@color/colorWhite" />
+                app:rippleColor="@color/colorWhite"
+                app:strokeWidth="0dp" />
 
         </LinearLayout>
 
@@ -300,8 +307,8 @@
                 android:layout_marginTop="@dimen/margin_12"
                 android:background="@drawable/btn_gradient"
                 android:fontFamily="@font/exo2_semibold"
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp"
+                android:paddingTop="@dimen/padding_0"
+                android:paddingBottom="@dimen/padding_0"
                 android:text="@string/signup1"
                 android:textColor="@color/colorWhite"
                 android:textSize="@dimen/text_12"
@@ -333,8 +340,8 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
+                android:layout_marginStart="@dimen/margin_8"
+                android:layout_marginEnd="@dimen/margin_8"
                 android:fontFamily="@font/exo2_medium"
                 android:text="@string/text_or"
                 android:textColor="@color/colorLightGrey"
@@ -356,8 +363,8 @@
             android:layout_height="52dp"
             android:layout_marginBottom="@dimen/margin_10"
             android:fontFamily="@font/exo2_semibold"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingTop="@dimen/padding_10"
+            android:paddingBottom="@dimen/padding_10"
             android:text="@string/continue_with_google"
             android:textColor="@color/colorBlack"
             android:textSize="@dimen/text_12"
@@ -367,10 +374,22 @@
             app:iconGravity="textStart"
             app:iconPadding="8dp"
             app:iconTint="@null"
+            android:stateListAnimator="@null"
             app:minHeight="0dp"
             app:rippleColor="@color/colorWhite"
             app:strokeColor="@color/colorBlack"
             app:strokeWidth="0.5dp" />
 
     </LinearLayout>
+
+    <include
+        layout="@layout/progress_bar"
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,8 +16,21 @@
         <item name="android:windowBackground">@color/colorBackground</item>
 
         <!-- Status bar color -->
-        <item name="android:statusBarColor">@color/colorPrimaryEnd</item>
+        <item name="android:statusBarColor">@color/colorHighlight</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/colorBackground</item>
 
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <style name="CircularImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="SpinnerTheme" parent="android:Widget.Spinner">
+        <item name="android:background">@drawable/spinner_box_bg</item>
     </style>
 </resources>
