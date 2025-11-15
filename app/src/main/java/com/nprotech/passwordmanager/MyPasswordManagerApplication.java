@@ -14,6 +14,7 @@ public class MyPasswordManagerApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         PreferenceManager.INSTANCE.init(this);
 
         // Apply theme

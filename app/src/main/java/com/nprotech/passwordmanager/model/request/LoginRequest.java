@@ -6,7 +6,7 @@ import java.io.Serializable;
 public class LoginRequest implements Serializable {
 
     private String email, password, fcmToken, appVersion, deviceId;
-    private boolean isGoogleLogin;
+    private boolean isGoogleLogin, isRememberMe;
 
     public void setEmail(String email) {
         this.email = email;
@@ -30,5 +30,13 @@ public class LoginRequest implements Serializable {
 
     public void setGoogleLogin(boolean googleLogin) {
         isGoogleLogin = googleLogin;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        isRememberMe = rememberMe;
+    }
+
+    public boolean isRememberMe() {
+        return isRememberMe;
     }
 }

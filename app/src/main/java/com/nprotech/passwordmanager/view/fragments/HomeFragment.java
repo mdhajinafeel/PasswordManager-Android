@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -100,9 +103,21 @@ public class HomeFragment extends Fragment {
                         try {
                             holder.setViewText(R.id.tvApplicationName, item.getApplicationName());
                             holder.setViewText(R.id.tvUsername, item.getUserName());
-                            holder.setViewText(R.id.tvPassword, CryptoHelper.decrypt(CommonUtils.getPasswordAlias(), item.getPassword()));
 
-                            if(item.getIcon() != null) {
+                            String decryptedPassword = CryptoHelper.decrypt(CommonUtils.getPasswordAlias(), item.getPassword());
+                            AppCompatTextView tvPassword = holder.getView(R.id.tvPassword);
+                            tvPassword.setText("••••••••");
+
+                            AppCompatCheckBox cbTogglePassword = holder.getView(R.id.cbTogglePassword);
+                            cbTogglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                                if (isChecked) {
+                                    tvPassword.setText(decryptedPassword);
+                                } else {
+                                    tvPassword.setText("••••••••");
+                                }
+                            });
+
+                            if (item.getIcon() != null) {
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(item.getIcon(), 0, item.getIcon().length);
                                 holder.setViewImageBitmap(R.id.imgPasswordIcon, bitmap);
                             }
@@ -121,6 +136,53 @@ public class HomeFragment extends Fragment {
                                 closeSwipe(holder);
                                 Toast.makeText(v.getContext(), "Deleted " + item.getTimeStamp(), Toast.LENGTH_SHORT).show();
                             });
+
+                            AppCompatTextView tvStrengthLabel = holder.getView(R.id.tvStrengthLabel);
+                            View viewStrengthIndicator = holder.getView(R.id.viewStrengthIndicator);
+
+                            Drawable background = viewStrengthIndicator.getBackground();
+
+                            if (item.getPasswordStrength() == 2) {
+
+                                if (background instanceof GradientDrawable) {
+                                    ((GradientDrawable) background).setColor(
+                                            ContextCompat.getColor(requireContext(), R.color.mediumColor)
+                                    );
+                                }
+
+                                tvStrengthLabel.setText(getString(R.string.medium));
+                                tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.mediumColor));
+                            } else if (item.getPasswordStrength() == 3) {
+
+                                if (background instanceof GradientDrawable) {
+                                    ((GradientDrawable) background).setColor(
+                                            ContextCompat.getColor(requireContext(), R.color.strongColor)
+                                    );
+                                }
+
+                                tvStrengthLabel.setText(getString(R.string.strong));
+                                tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.strongColor));
+                            } else if (item.getPasswordStrength() == 4) {
+
+                                if (background instanceof GradientDrawable) {
+                                    ((GradientDrawable) background).setColor(
+                                            ContextCompat.getColor(requireContext(), R.color.veryStrongColor)
+                                    );
+                                }
+
+                                tvStrengthLabel.setText(getString(R.string.very_strong));
+                                tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.veryStrongColor));
+                            } else {
+
+                                if (background instanceof GradientDrawable) {
+                                    ((GradientDrawable) background).setColor(
+                                            ContextCompat.getColor(requireContext(), R.color.weakColor)
+                                    );
+                                }
+
+                                tvStrengthLabel.setText(getString(R.string.weak));
+                                tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), R.color.weakColor));
+                            }
                         } catch (Exception e) {
                             AppLogger.e(getInstance().getClass(), "Error Password List", e);
                         }
@@ -223,13 +285,19 @@ public class HomeFragment extends Fragment {
                     boolean isPasswordUpdated = result.getData().getBooleanExtra("isUpdated", false);
                     PasswordModel newPassword = (PasswordModel) result.getData().getSerializableExtra("newPassword");
                     if (isPasswordSaved && newPassword != null) {
-                        passwordEntityCommonRecyclerViewAdapter.addItem(newPassword);
-                        int position = passwordEntityCommonRecyclerViewAdapter.getItemCount() - 1;
-                        passwordEntityCommonRecyclerViewAdapter.notifyItemInserted(position);
-                        Toast.makeText(requireContext(), getString(R.string.password_saved_successfully), Toast.LENGTH_LONG).show();
-                    } else if(isPasswordUpdated) {
+
+                        if (passwordEntityCommonRecyclerViewAdapter != null) {
+                            passwordEntityCommonRecyclerViewAdapter.addItem(newPassword);
+                            int position = passwordEntityCommonRecyclerViewAdapter.getItemCount() - 1;
+                            passwordEntityCommonRecyclerViewAdapter.notifyItemInserted(position);
+                        } else {
+                            fetchPasswords();
+                        }
+
+                        Toast.makeText(requireContext(), getString(R.string.password_saved_successfully), Toast.LENGTH_SHORT).show();
+                    } else if (isPasswordUpdated) {
                         passwordEntityCommonRecyclerViewAdapter.updateData(passwordViewModel.getPasswords());
-                        Toast.makeText(requireContext(), getString(R.string.password_updated_successfully), Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), getString(R.string.password_updated_successfully), Toast.LENGTH_SHORT).show();
                     }
                 }
             });

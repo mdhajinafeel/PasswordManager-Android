@@ -5,7 +5,7 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class PasswordModel implements Serializable {
 
-    private int iconId, id, databaseId, categoryId;
+    private int iconId, id, databaseId, categoryId, passwordStrength;
     private long timeStamp;
     private String applicationName, password, userName, category;
     private boolean isFavourite, isCustomIcon;
@@ -105,5 +105,13 @@ public class PasswordModel implements Serializable {
 
     public void setIcon(byte[] icon) {
         this.icon = icon;
+    }
+
+    public int getPasswordStrength() {
+        return passwordStrength;
+    }
+
+    public void setPasswordStrength(int passwordStrength) {
+        this.passwordStrength = passwordStrength;
     }
 }

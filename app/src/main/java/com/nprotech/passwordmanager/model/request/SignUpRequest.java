@@ -6,7 +6,7 @@ import java.io.Serializable;
 public class SignUpRequest implements Serializable {
 
     private String name, email, password, fcmToken, appVersion, deviceId;
-    private boolean isGoogle;
+    private boolean isGoogle, isRememberMe;
 
     public void setName(String name) {
         this.name = name;
@@ -34,5 +34,13 @@ public class SignUpRequest implements Serializable {
 
     public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
+    }
+
+    public boolean isRememberMe() {
+        return isRememberMe;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        isRememberMe = rememberMe;
     }
 }

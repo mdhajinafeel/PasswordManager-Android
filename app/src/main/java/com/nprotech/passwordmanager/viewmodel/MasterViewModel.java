@@ -124,4 +124,8 @@ public class MasterViewModel extends ViewModel {
     public List<IconEntity> getAllIcons() {
         return masterRepository.getAllIcons();
     }
+
+    public void clearScheduler() {
+        masterRepository.clearScheduler();
+    }
 }

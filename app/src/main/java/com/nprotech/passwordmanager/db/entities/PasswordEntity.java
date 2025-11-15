@@ -23,6 +23,7 @@ public class PasswordEntity implements Serializable {
     private boolean isCustomIcon;
     private byte[] icon;
     private int iconId;
+    private int passwordStrength;
 
     public int getId() {
         return id;
@@ -134,5 +135,13 @@ public class PasswordEntity implements Serializable {
 
     public void setIconId(int iconId) {
         this.iconId = iconId;
+    }
+
+    public int getPasswordStrength() {
+        return passwordStrength;
+    }
+
+    public void setPasswordStrength(int passwordStrength) {
+        this.passwordStrength = passwordStrength;
     }
 }

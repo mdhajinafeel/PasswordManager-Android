@@ -133,4 +133,8 @@ public class MasterRepository {
     public List<IconEntity> getAllIcons() {
         return iconDao.getAllIcons();
     }
+
+    public void clearScheduler() {
+        schedulerDao.clearAll();
+    }
 }

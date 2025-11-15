@@ -100,4 +100,6 @@
     <string name="favourites">Favourites</string>
     <string name="security">Security</string>
     <string name="synchronization">Synchronization</string>
+    <string name="show_password">Show Password</string>
+    <string name="set_as_favourite">Set as favourite</string>
 </resources>

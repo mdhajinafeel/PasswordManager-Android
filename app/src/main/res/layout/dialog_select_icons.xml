@@ -68,7 +68,7 @@
                     android:textColor="@color/colorDarkGrey"
                     android:textColorHint="@color/colorLightGrey"
                     android:textCursorDrawable="@null"
-                    android:textSize="@dimen/text_10"
+                    android:textSize="@dimen/text_12"
                     android:visibility="gone" />
 
             </LinearLayout>

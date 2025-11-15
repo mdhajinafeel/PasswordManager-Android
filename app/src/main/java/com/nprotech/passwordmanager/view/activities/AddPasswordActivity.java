@@ -48,6 +48,7 @@ import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.model.PasswordModel;
 import com.nprotech.passwordmanager.utils.AppLogger;
 import com.nprotech.passwordmanager.utils.CommonUtils;
+import com.nprotech.passwordmanager.utils.NetworkConnectivity;
 import com.nprotech.passwordmanager.view.adapter.CategoryAdapter;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
 import com.nprotech.passwordmanager.view.adapter.ViewHolder;
@@ -57,6 +58,7 @@ import com.nprotech.passwordmanager.viewmodel.PasswordViewModel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,6 +71,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
     private TextInputLayout tiApplicationName, tiUserName, tiCategory, tiPassword;
     private AppCompatTextView txtPasswordStrength;
     private ShapeableImageView imgPasswordIcon;
+    private MaterialCheckBox cbFavoriteSet;
     private View passwordStrengthBar;
     private MaterialAutoCompleteTextView etCategory;
     private MaterialCheckBox cbNumbers, cbSymbols, cbLowerCase, cbUpperCase;
@@ -85,6 +88,9 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
     private byte[] imgPasswordIconArray;
     private boolean isCustomIcon;
     private Bundle bundle;
+    private CommonRecyclerViewAdapter<IconEntity> iconCommonRecyclerViewAdapter;
+    private int passwordStrength = 1;
+    private boolean isFavouriteSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +124,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
             etPassword = findViewById(R.id.etPassword);
             imgPasswordIcon = findViewById(R.id.imgPasswordIcon);
             AppCompatTextView tvChangeIcon = findViewById(R.id.tvChangeIcon);
+            cbFavoriteSet = findViewById(R.id.cbFavoriteSet);
 
             passwordStrengthBar = findViewById(R.id.passwordStrengthBar);
             txtPasswordStrength = findViewById(R.id.txtPasswordStrength);
@@ -145,7 +152,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
 
             if (bundle != null) {
 
-                if(bundle.getBoolean("isEdit")) {
+                if (bundle.getBoolean("isEdit")) {
                     txtTitle.setText(R.string.update_password);
                     btnSave.setText(R.string.update);
                 } else {
@@ -211,6 +218,8 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     }
                 });
 
+                cbFavoriteSet.setOnCheckedChangeListener((buttonView, isChecked) -> isFavouriteSet = isChecked);
+
                 fetchEditData(bundle);
             } else {
                 Intent resultIntent = new Intent();
@@ -256,11 +265,11 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
 
     private void fetchEditData(Bundle bundle) {
         try {
-            if(bundle.getBoolean("isEdit")) {
+            if (bundle.getBoolean("isEdit")) {
 
                 PasswordEntity passwordEntity = passwordViewModel.getPassword(bundle.getLong("timeStamp"));
 
-                if(passwordEntity != null) {
+                if (passwordEntity != null) {
                     etApplicationName.setText(passwordEntity.getApplicationName());
                     etUserName.setText(passwordEntity.getApplicationName());
                     etApplicationLink.setText(passwordEntity.getLink());
@@ -268,16 +277,18 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     isCustomIcon = passwordEntity.isCustomIcon();
                     categoryId = passwordEntity.getCategory();
                     iconId = passwordEntity.getIconId();
+                    isFavouriteSet = passwordEntity.isFavourite();
+                    cbFavoriteSet.setChecked(passwordEntity.isFavourite());
 
                     PasswordModel passwordModel = passwordViewModel.getPasswordModel(bundle.getLong("timeStamp"));
-                    if(passwordModel != null) {
+                    if (passwordModel != null) {
 
                         etCategory.setText(passwordModel.getCategory());
 
                         Bitmap bitmap = BitmapFactory.decodeByteArray(passwordModel.getIcon(), 0, passwordModel.getIcon().length);
                         imgPasswordIcon.setImageBitmap(bitmap);
 
-                        if(passwordModel.isCustomIcon()) {
+                        if (passwordModel.isCustomIcon()) {
                             imgPasswordIconArray = passwordModel.getIcon();
                         } else {
                             imgPasswordIconArray = null;
@@ -415,45 +426,58 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                 passwordEntity.setIcon(imgPasswordIconArray);
                 passwordEntity.setCustomIcon(isCustomIcon);
                 passwordEntity.setIconId(iconId);
+                passwordEntity.setPasswordStrength(passwordStrength);
+                passwordEntity.setFavourite(isFavouriteSet);
 
-                if(bundle.getBoolean("isEdit")) {
+                if (bundle.getBoolean("isEdit")) {
 
                     passwordEntity.setTimeStamp(bundle.getLong("timeStamp"));
 
-                    passwordViewModel.updatePassword(passwordEntity);
+                    if (new NetworkConnectivity(this).isNetworkAvailable()) {
+                        passwordViewModel.updatePassword(passwordEntity);
 
-                    passwordViewModel.getUpdateStatus().observe(this, s -> {
-                        if (s) {
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("isSaved", false);
-                            resultIntent.putExtra("isUpdated", true);
-                            setResult(Activity.RESULT_OK, resultIntent);
-                            finish();
-                        } else {
-                            showCustomDialog(passwordViewModel.getErrorTitle(), passwordViewModel.getErrorMessage(), false);
-                        }
-                    });
+                        passwordViewModel.getUpdateStatus().observe(this, s -> {
+                            if (s) {
+                                Intent resultIntent = new Intent();
+                                resultIntent.putExtra("isSaved", false);
+                                resultIntent.putExtra("isUpdated", true);
+                                setResult(Activity.RESULT_OK, resultIntent);
+                                finish();
+                            } else {
+                                showCustomDialog(passwordViewModel.getErrorTitle(), passwordViewModel.getErrorMessage(), false);
+                            }
+                        });
+                    } else {
+                        showCustomDialog(getString(R.string.information), getString(R.string.internet_not_available), false);
+                    }
                 } else {
+
+                    long timeStamp = CommonUtils.getCurrentDateTimeStamp(true);
 
                     passwordEntity.setDeleted(false);
                     passwordEntity.setFavourite(false);
                     passwordEntity.setDatabaseId(0);
-                    passwordEntity.setTimeStamp(CommonUtils.getCurrentDateTimeStamp(true));
+                    passwordEntity.setTimeStamp(timeStamp);
+                    passwordEntity.setPasswordStrength(passwordStrength);
 
-                    passwordViewModel.savePassword(passwordEntity);
+                    if (new NetworkConnectivity(this).isNetworkAvailable()) {
+                        passwordViewModel.savePassword(passwordEntity);
 
-                    passwordViewModel.getSaveStatus().observe(this, s -> {
-                        if (s) {
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("newPassword", passwordEntity);
-                            resultIntent.putExtra("isSaved", true);
-                            resultIntent.putExtra("isUpdated", false);
-                            setResult(Activity.RESULT_OK, resultIntent);
-                            finish();
-                        } else {
-                            showCustomDialog(passwordViewModel.getErrorTitle(), passwordViewModel.getErrorMessage(), false);
-                        }
-                    });
+                        passwordViewModel.getSaveStatus().observe(this, s -> {
+                            if (s) {
+                                Intent resultIntent = new Intent();
+                                resultIntent.putExtra("newPassword", passwordViewModel.getPasswordModel(timeStamp));
+                                resultIntent.putExtra("isSaved", true);
+                                resultIntent.putExtra("isUpdated", false);
+                                setResult(Activity.RESULT_OK, resultIntent);
+                                finish();
+                            } else {
+                                showCustomDialog(passwordViewModel.getErrorTitle(), passwordViewModel.getErrorMessage(), false);
+                            }
+                        });
+                    } else {
+                        showCustomDialog(getString(R.string.information), getString(R.string.internet_not_available), false);
+                    }
                 }
             }
 
@@ -506,22 +530,26 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     color = ContextCompat.getColor(this, R.color.weakColor);
                     label = getString(R.string.weak);
                     widthPercent = 0.25f;
+                    passwordStrength = CommonUtils.passwordWeak;
                     break;
                 case 2:
                 case 3:
                     color = ContextCompat.getColor(this, R.color.mediumColor);
                     label = getString(R.string.medium);
                     widthPercent = 0.5f;
+                    passwordStrength = CommonUtils.passwordMedium;
                     break;
                 case 4:
                     color = ContextCompat.getColor(this, R.color.strongColor);
                     label = getString(R.string.strong);
                     widthPercent = 0.75f;
+                    passwordStrength = CommonUtils.passwordStrong;
                     break;
                 default:
                     color = ContextCompat.getColor(this, R.color.veryStrongColor);
                     label = getString(R.string.very_strong);
                     widthPercent = 1f;
+                    passwordStrength = CommonUtils.passwordVeryStrong;
                     break;
             }
 
@@ -621,7 +649,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                 etDialogSearch.setVisibility(View.VISIBLE);
                 rvDialogIcons.setVisibility(View.VISIBLE);
 
-                CommonRecyclerViewAdapter<IconEntity> iconCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(getApplicationContext(), masterViewModel.getAllIcons(),
+                iconCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(getApplicationContext(), masterViewModel.getAllIcons(),
                         R.layout.row_item_icon) {
                     @Override
                     public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull IconEntity item) {
@@ -642,6 +670,21 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                 rvDialogIcons.setAdapter(iconCommonRecyclerViewAdapter);
                 rvDialogIcons.setNestedScrollingEnabled(true);
 
+                etDialogSearch.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        filterList(s.toString());
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
+
             } else {
                 etDialogSearch.setVisibility(View.GONE);
                 rvDialogIcons.setVisibility(View.GONE);
@@ -653,5 +696,15 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error showIconsDialog", e);
         }
+    }
+
+    private void filterList(String text) {
+        List<IconEntity> filteredList = new ArrayList<>();
+        for (IconEntity item : masterViewModel.getAllIcons()) {
+            if (item.getName().toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        iconCommonRecyclerViewAdapter.updateData(filteredList);
     }
 }

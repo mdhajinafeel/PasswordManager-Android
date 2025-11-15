@@ -18,10 +18,17 @@ import com.nprotech.passwordmanager.helper.PreferenceManager;
 
 public class CommonUtils {
 
+    //API Constants
     public static final int masterApiId = 1;
     public static final String masterApiName = "Download Master";
     public static final int syncApiId = 2;
     public static final String syncApiName = "Sync Data";
+
+    //Password Priority
+    public static final int passwordWeak = 1;
+    public static final int passwordMedium = 2;
+    public static final int passwordStrong = 3;
+    public static final int passwordVeryStrong = 4;
 
     public static String generateNonce(int length) {
         SecureRandom secureRandom = new SecureRandom();

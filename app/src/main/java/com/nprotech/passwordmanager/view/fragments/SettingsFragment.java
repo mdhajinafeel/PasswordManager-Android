@@ -38,7 +38,7 @@ import com.nprotech.passwordmanager.view.activities.MainActivity;
 import com.nprotech.passwordmanager.view.adapter.SettingsRecyclerAdapter;
 import com.nprotech.passwordmanager.viewmodel.AuthViewModel;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
-import com.nprotech.passwordmanager.work.WorkScheduler;
+import com.nprotech.passwordmanager.work.SyncScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +55,8 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     private SettingsRecyclerAdapter adapter;
     private AuthViewModel loginViewModel;
     private MasterViewModel masterViewModel;
+    // Permission launcher (Android 13+)
+    //private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     public static SettingsFragment getInstance() {
         return new SettingsFragment();
@@ -74,6 +76,17 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
+
+//        notificationPermissionLauncher =
+//                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+//                    if (isGranted) {
+//                        Toast.makeText(getActivity(), "Notification permission granted", Toast.LENGTH_SHORT).show();
+//                        startSyncService();
+//                    } else {
+//                        Toast.makeText(getActivity(), "Permission denied!", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+
         try {
 
             AppCompatImageView profileImage = view.findViewById(R.id.profileImage);
@@ -235,9 +248,9 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
                 PreferenceManager.INSTANCE.setSyncHours(itemValue);
 
                 if (itemValue == 0) {
-                    WorkScheduler.cancelSyncWork(getContext());
+                    SyncScheduler.cancelHourlySync(requireContext());
                 } else {
-                    WorkScheduler.scheduleSyncWork(getContext(), PreferenceManager.INSTANCE.getSyncHours());
+                    SyncScheduler.scheduleHourlySync(requireContext(), PreferenceManager.INSTANCE.getSyncHours());
                 }
 
                 // ✅ Dynamically add/remove "Synchronization" item
@@ -387,7 +400,12 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
                     dialog.dismiss();
                     if (aBoolean) {
                         if (getActivity() instanceof BaseActivity) {
-                            ((BaseActivity) getActivity()).performLogout(getContext());
+
+                            PreferenceManager.INSTANCE.clearLoginSession();
+                            SyncScheduler.cancelHourlySync(requireContext());
+                            masterViewModel.clearScheduler();
+
+                            ((BaseActivity) getActivity()).performLogout();
                         }
                     } else {
                         Toast.makeText(requireContext(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();

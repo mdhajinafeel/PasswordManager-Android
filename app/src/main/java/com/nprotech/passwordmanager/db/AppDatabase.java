@@ -49,11 +49,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     SupportFactory factory = new SupportFactory(passphrase);
 
                     // ✅ Build Room database
-                    RoomDatabase.Builder<AppDatabase> builder = Room.databaseBuilder(
-                                    context.getApplicationContext(),
-                                    AppDatabase.class,
-                                    DB_NAME
-                            )
+                    RoomDatabase.Builder<AppDatabase> builder = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, DB_NAME)
                             .fallbackToDestructiveMigration(true);
 
                     // ✅ Allow main thread queries in DEBUG only

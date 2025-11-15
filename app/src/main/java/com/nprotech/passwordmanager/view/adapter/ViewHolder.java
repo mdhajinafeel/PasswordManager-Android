@@ -61,9 +61,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         return this;
     }
 
-    public ViewHolder setViewImageBitmap(int viewId, Bitmap bitmap) {
+    public void setViewImageBitmap(int viewId, Bitmap bitmap) {
         ReflectHelper.invokeMethodIfExists("setImageBitmap", getView(viewId), new Class[]{Bitmap.class}, bitmap);
-        return this;
     }
 
     public ViewHolder setViewImageDrawable(int viewId, Drawable drawable) {

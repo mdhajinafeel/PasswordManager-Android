@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f02ba52b9f4ff2039e1df824543f981f",
+    "identityHash": "d10c836a1ce652d57ccd05ccdb36821b",
     "entities": [
       {
         "tableName": "categories",
@@ -62,7 +62,7 @@
       },
       {
         "tableName": "passwords",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timeStamp` INTEGER NOT NULL, `databaseId` INTEGER NOT NULL, `applicationName` TEXT, `userName` TEXT, `link` TEXT, `category` INTEGER NOT NULL, `password` TEXT, `isSynced` INTEGER NOT NULL, `isFavourite` INTEGER NOT NULL, `isDeleted` INTEGER NOT NULL, `isCustomIcon` INTEGER NOT NULL, `icon` BLOB, `iconId` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timeStamp` INTEGER NOT NULL, `databaseId` INTEGER NOT NULL, `applicationName` TEXT, `userName` TEXT, `link` TEXT, `category` INTEGER NOT NULL, `password` TEXT, `isSynced` INTEGER NOT NULL, `isFavourite` INTEGER NOT NULL, `isDeleted` INTEGER NOT NULL, `isCustomIcon` INTEGER NOT NULL, `icon` BLOB, `iconId` INTEGER NOT NULL, `passwordStrength` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -142,6 +142,12 @@
             "columnName": "iconId",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "passwordStrength",
+            "columnName": "passwordStrength",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -195,7 +201,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f02ba52b9f4ff2039e1df824543f981f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd10c836a1ce652d57ccd05ccdb36821b')"
     ]
   }
 }

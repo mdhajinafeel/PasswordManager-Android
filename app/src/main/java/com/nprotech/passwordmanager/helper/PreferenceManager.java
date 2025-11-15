@@ -22,11 +22,13 @@ public enum PreferenceManager {
     private static final String KEY_EMAIL_ID = "emailId";
     private static final String KEY_GOOGLE_SIGN_IN = "googleSignIn";
     private static final String KEY_LOGGED_IN = "loggedIn";
+    private static final String KEY_REMEMBER_ME = "rememberMe";
     private static final String KEY_DARK_MODE = "darkMode";
     private static final String KEY_BIOMETRIC = "bioMetric";
     private static final String KEY_SECRET = "secretKey";
     private static final String KEY_SYNC_ID = "syncId";
     private static final String KEY_SYNC_HOURS = "syncHours";
+    private static final String KEY_BATTERY_OPTIMIZATION = "batteryOptimization";
     private SharedPreferences prefStore;
 
     // Initialize once in Application or Activity
@@ -113,6 +115,15 @@ public enum PreferenceManager {
         return prefStore.getBoolean(KEY_LOGGED_IN, false);
     }
 
+    // ===== Remember Me =====
+    public void setRememberMe(boolean rememberMe) {
+        prefStore.edit().putBoolean(KEY_REMEMBER_ME, rememberMe).apply();
+    }
+
+    public boolean getRememberMe() {
+        return prefStore.getBoolean(KEY_REMEMBER_ME, false);
+    }
+
     // ===== GoogleSignIn =====
     public void setGoogleSignIn(boolean googleSignIn) {
         prefStore.edit().putBoolean(KEY_GOOGLE_SIGN_IN, googleSignIn).apply();
@@ -165,6 +176,15 @@ public enum PreferenceManager {
 
     public int getSyncHours() {
         return prefStore.getInt(KEY_SYNC_HOURS, 0);
+    }
+
+    // ===== Battery Optimization =====
+    public void setBatteryPermissionAsked(boolean batteryPermissionAsked) {
+        prefStore.edit().putBoolean(KEY_BATTERY_OPTIMIZATION, batteryPermissionAsked).apply();
+    }
+
+    public boolean isBatteryPermissionAsked() {
+        return prefStore.getBoolean(KEY_BATTERY_OPTIMIZATION, false);
     }
 
     // Optional: clear all

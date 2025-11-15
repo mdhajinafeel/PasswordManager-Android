@@ -1,5 +1,8 @@
 package com.nprotech.passwordmanager.view.activities;
 
+import android.app.AlarmManager;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -17,7 +20,7 @@ import com.nprotech.passwordmanager.view.fragments.HomeFragment;
 import com.nprotech.passwordmanager.view.fragments.SecurityFragment;
 import com.nprotech.passwordmanager.view.fragments.SettingsFragment;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
-import com.nprotech.passwordmanager.work.WorkScheduler;
+import com.nprotech.passwordmanager.work.SyncScheduler;
 import com.qamar.curvedbottomnaviagtion.CurvedBottomNavigation;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -33,6 +36,15 @@ public class MainActivity extends BaseActivity {
         try {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                if (!alarmManager.canScheduleExactAlarms()) {
+                    // Show a dialog directing the user to settings
+                    Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                    startActivity(intent);
+                }
+            }
 
             if (getSupportActionBar() != null) {
                 getSupportActionBar().hide();
@@ -52,12 +64,12 @@ public class MainActivity extends BaseActivity {
 
             Bundle bundle = getIntent().getExtras();
 
-            if(bundle != null) {
-                if(bundle.getBoolean("isFromLogin")) {
+            if (bundle != null) {
+                if (bundle.getBoolean("isFromLogin")) {
                     PreferenceManager.INSTANCE.setSyncId(1);
                     PreferenceManager.INSTANCE.setSyncHours(1);
 
-                    WorkScheduler.scheduleSyncWork(getApplicationContext(), PreferenceManager.INSTANCE.getSyncHours());
+                    SyncScheduler.scheduleHourlySync(getApplicationContext(), PreferenceManager.INSTANCE.getSyncHours());
                 }
             }
 
@@ -120,7 +132,7 @@ public class MainActivity extends BaseActivity {
             ).show(getSupportFragmentManager(), "errorDialog"));
 
             masterViewModel.getProgressState().observe(this, s -> {
-                if(s) {
+                if (s) {
                     showProgress();
                 } else {
                     hideProgress();

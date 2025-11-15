@@ -15,9 +15,7 @@ import androidx.appcompat.widget.AppCompatTextView;
 
 import com.google.android.material.button.MaterialButton;
 import com.nprotech.passwordmanager.R;
-import com.nprotech.passwordmanager.helper.PreferenceManager;
 import com.nprotech.passwordmanager.view.activities.LoginActivity;
-import com.nprotech.passwordmanager.work.WorkScheduler;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -87,11 +85,7 @@ public class BaseActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void performLogout(Context context) {
-        PreferenceManager.INSTANCE.clearLoginSession();
-
-        WorkScheduler.cancelSyncWork(context);
-
+    public void performLogout() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

@@ -4,7 +4,6 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
-import androidx.room.Update;
 
 import com.nprotech.passwordmanager.db.entities.PasswordEntity;
 import com.nprotech.passwordmanager.model.PasswordModel;
@@ -14,7 +13,7 @@ import java.util.List;
 @Dao
 public interface PasswordDao {
 
-    @Query("SELECT pwd.id AS id, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
+    @Query("SELECT pwd.passwordStrength AS passwordStrength, pwd.id AS id, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
             "pwd.isCustomIcon AS isCustomIcon, pwd.isFavourite AS isFavourite, pwd.category AS categoryId, ctg.categoryName AS category," +
             "CASE WHEN pwd.isCustomIcon = 1 THEN pwd.icon ELSE icn.icon END AS icon " +
             "FROM passwords pwd " +
@@ -23,7 +22,7 @@ public interface PasswordDao {
             "ORDER BY pwd.id DESC")
     List<PasswordModel> getPasswords();
 
-    @Query("SELECT pwd.id AS id, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
+    @Query("SELECT pwd.passwordStrength AS passwordStrength, pwd.id AS id, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
             "pwd.isCustomIcon AS isCustomIcon, pwd.isFavourite AS isFavourite, pwd.category AS categoryId, ctg.categoryName AS category," +
             "CASE WHEN pwd.isCustomIcon = 1 THEN pwd.icon ELSE icn.icon END AS icon " +
             "FROM passwords pwd " +

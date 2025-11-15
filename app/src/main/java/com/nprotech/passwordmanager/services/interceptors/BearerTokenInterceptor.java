@@ -126,7 +126,7 @@ public class BearerTokenInterceptor implements Interceptor {
 
     private void handleLogout() {
         if (!isBackground) {
-            PreferenceManager.INSTANCE.clearAll();
+            PreferenceManager.INSTANCE.clearLoginSession();
             Intent intent = new Intent(context, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             context.startActivity(intent);

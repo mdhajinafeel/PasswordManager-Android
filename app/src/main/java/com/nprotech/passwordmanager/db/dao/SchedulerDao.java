@@ -5,10 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.nprotech.passwordmanager.db.entities.IconEntity;
 import com.nprotech.passwordmanager.db.entities.SchedulerEntity;
-
-import java.util.List;
 
 @Dao
 public interface SchedulerDao {

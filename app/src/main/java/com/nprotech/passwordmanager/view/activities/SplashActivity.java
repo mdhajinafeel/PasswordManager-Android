@@ -12,6 +12,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
@@ -28,7 +29,11 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SplashActivity extends BaseActivity {
 
     private boolean isAuthenticating = false;
-    private static final int SPLASH_DELAY = 2000; // 2 seconds
+    private static final int SPLASH_DELAY = 1500; // 1.5 seconds
+    private boolean biometricShown = false;
+    private static final int INTENT_FLAGS = Intent.FLAG_ACTIVITY_NEW_TASK
+            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+            | Intent.FLAG_ACTIVITY_CLEAR_TOP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,30 +56,55 @@ public class SplashActivity extends BaseActivity {
 
         // Delay and move to next activity
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (PreferenceManager.INSTANCE.getLoggedIn() && PreferenceManager.INSTANCE.getBioMetric()) {
-                showBiometricPrompt();
-            } else if (PreferenceManager.INSTANCE.getLoggedIn()) {
-                startActivity(new Intent(SplashActivity.this, MainActivity.class)
-                        .putExtra("isFromLogin", false)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+
+            boolean isLoggedIn = PreferenceManager.INSTANCE.getLoggedIn();
+            boolean isRememberMe = PreferenceManager.INSTANCE.getRememberMe();
+            boolean isGoogleSignIn = PreferenceManager.INSTANCE.getGoogleSignIn();
+            boolean isBiometric = PreferenceManager.INSTANCE.getBioMetric();
+            boolean isAutoLogin = isRememberMe || isGoogleSignIn;
+
+            if (isLoggedIn) {
+                if (isBiometric && isAutoLogin) {
+                    showBiometricPrompt();
+                } else if (isAutoLogin) {
+                    redirectToMain();
+                } else {
+                    redirectToLogin();
+                }
             } else {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                redirectToLogin();
             }
         }, SPLASH_DELAY);
     }
 
+    private void redirectToMain() {
+        startActivity(new Intent(this, MainActivity.class)
+                .putExtra("isFromLogin", false)
+                .addFlags(INTENT_FLAGS));
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    private void redirectToLogin() {
+        startActivity(new Intent(this, LoginActivity.class)
+                .addFlags(INTENT_FLAGS));
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
     private void showBiometricPrompt() {
+
+        BiometricManager biometricManager = BiometricManager.from(this);
+        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                != BiometricManager.BIOMETRIC_SUCCESS) {
+            redirectToMain(); // fallback if no biometric available
+            return;
+        }
+
         if (isAuthenticating) return;
         isAuthenticating = true;
 
         Executor executor = ContextCompat.getMainExecutor(this);
 
-        // Proceed to dashboard
-        // User pressed back / tapped outside
-        // show dialog immediately instead of reopening
-        // User pressed back / tapped outside
-        // show dialog immediately instead of reopening
+        // Initialize biometric prompt and handle authentication callbacks
         BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor,
                 new BiometricPrompt.AuthenticationCallback() {
                     @Override
@@ -83,8 +113,7 @@ public class SplashActivity extends BaseActivity {
                         isAuthenticating = false;
 
                         // Proceed to dashboard
-                        startActivity(new Intent(SplashActivity.this, MainActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                        redirectToMain();
                     }
 
                     @Override
@@ -92,13 +121,10 @@ public class SplashActivity extends BaseActivity {
                         super.onAuthenticationError(errorCode, errString);
                         isAuthenticating = false;
 
-                        if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
-                            // User pressed back / tapped outside
-                            showExitConfirmationDialog(); // show dialog immediately instead of reopening
-                        } else if (errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
+                        if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
+                                errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
                                 errorCode == BiometricPrompt.ERROR_CANCELED) {
-                            // User pressed back / tapped outside
-                            showExitConfirmationDialog(); // show dialog immediately instead of reopening
+                            showExitConfirmationDialog();
                         }
                     }
 
@@ -121,9 +147,16 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (isFinishing() || isAuthenticating) return;
 
-        if (PreferenceManager.INSTANCE.getLoggedIn() && PreferenceManager.INSTANCE.getBioMetric()) {
-            new Handler(Looper.getMainLooper()).postDelayed(this::showBiometricPrompt, 100);
+        boolean shouldPrompt = PreferenceManager.INSTANCE.getLoggedIn()
+                && PreferenceManager.INSTANCE.getBioMetric()
+                && (PreferenceManager.INSTANCE.getRememberMe() || PreferenceManager.INSTANCE.getGoogleSignIn());
+
+        if (shouldPrompt && !biometricShown) {
+            biometricShown = true;
+            isAuthenticating = true;
+            new Handler(Looper.getMainLooper()).postDelayed(this::showBiometricPrompt, 200);
         }
     }
 

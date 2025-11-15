@@ -31,6 +31,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
@@ -69,6 +70,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private static final int REQ_ONE_TAP = 1100;
     private String fcmToken = "";
     private AuthViewModel loginViewModel;
+    private boolean isRememberMe = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,9 +113,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             etNameSignup = findViewById(R.id.etNameSignup);
             etEmailSignup = findViewById(R.id.etEmailSignup);
             etPasswordSignup = findViewById(R.id.etPasswordSignup);
-            MaterialButton btnSignup = findViewById(R.id.btnSignup);
 
+            MaterialButton btnSignup = findViewById(R.id.btnSignup);
             MaterialButton btnGoogle = findViewById(R.id.btnGoogle);
+
+            MaterialCheckBox cbRememberMe = findViewById(R.id.cbRememberMe);
+            MaterialCheckBox cbRememberMeSignUp = findViewById(R.id.cbRememberMeSignUp);
+            AppCompatTextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
             fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
             fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
@@ -169,6 +175,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     hideProgress(progressBar);
                 }
             });
+
+            cbRememberMe.setOnCheckedChangeListener((buttonView, isChecked) -> isRememberMe = isChecked);
+
+            cbRememberMeSignUp.setOnCheckedChangeListener((buttonView, isChecked) -> isRememberMe = isChecked);
+
+            tvForgotPassword.setOnClickListener(v -> Toast.makeText(getApplicationContext(), "Reset Clicked", LENGTH_SHORT).show());
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error initializing components", e);
         }
@@ -191,6 +203,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                 loginForm.setVisibility(View.VISIBLE);
                 loginForm.startAnimation(fadeIn);
+
+                isRememberMe = false;
             }
 
             if (v.getId() == R.id.tabSignup) {
@@ -207,6 +221,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                 signupForm.setVisibility(View.VISIBLE);
                 signupForm.startAnimation(fadeIn);
+
+                isRememberMe = false;
             }
 
             if (v.getId() == R.id.btnLogin) {
@@ -261,6 +277,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     loginRequest.setFcmToken(fcmToken);
                     loginRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
                     loginRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
+                    loginRequest.setRememberMe(isRememberMe);
 
                     loginViewModel.login(loginRequest);
 
@@ -275,6 +292,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         PreferenceManager.INSTANCE.setLoggedIn(true);
                         PreferenceManager.INSTANCE.setGoogleSignIn(false);
                         PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+                        PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                         startActivity(new Intent(this, MainActivity.class)
                                 .putExtra("isFromLogin", true)
@@ -338,6 +356,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     signUpRequest.setFcmToken(fcmToken);
                     signUpRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
                     signUpRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
+                    signUpRequest.setRememberMe(isRememberMe);
 
                     loginViewModel.register(signUpRequest);
 
@@ -352,6 +371,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         PreferenceManager.INSTANCE.setLoggedIn(true);
                         PreferenceManager.INSTANCE.setGoogleSignIn(false);
                         PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+                        PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                         startActivity(new Intent(this, MainActivity.class)
                                 .putExtra("isFromLogin", true)
@@ -434,6 +454,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             signUpRequest.setFcmToken(fcmToken);
                             signUpRequest.setDeviceId(CommonUtils.getDeviceId(getApplicationContext()));
                             signUpRequest.setAppVersion(CommonUtils.getAppVersionName(this) + " " + CommonUtils.getAppVersionCode(this));
+                            signUpRequest.setRememberMe(isRememberMe);
 
                             loginViewModel.register(signUpRequest);
 
@@ -448,6 +469,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 PreferenceManager.INSTANCE.setLoggedIn(true);
                                 PreferenceManager.INSTANCE.setGoogleSignIn(true);
                                 PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
+                                PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                                 startActivity(new Intent(this, MainActivity.class)
                                         .putExtra("isFromLogin", true)
