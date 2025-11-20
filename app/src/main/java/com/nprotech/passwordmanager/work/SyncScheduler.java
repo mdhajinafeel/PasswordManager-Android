@@ -1,5 +1,6 @@
 package com.nprotech.passwordmanager.work;
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -10,11 +11,23 @@ import com.nprotech.passwordmanager.utils.AppLogger;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Schedules periodic sync operations using {@link AlarmManager} and {@link SyncWorker}.
+ * This class provides methods to schedule and cancel hourly syncs.
+ * The sync is scheduled using an exact alarm for precision, with a fallback
+ * to {@link androidx.work.WorkManager} for devices with aggressive power-saving features.
+ */
 public class SyncScheduler {
 
     private static final int SYNC_REQUEST_CODE = 1001;
 
-    /** Schedule exact hourly sync */
+    /**
+     * Schedules an exact hourly sync.
+     *
+     * @param context The application context.
+     * @param hours   The interval in hours at which to repeat the sync.
+     */
+    @SuppressLint("ObsoleteSdkInt")
     public static void scheduleHourlySync(Context context, int hours) {
         long triggerAt = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(hours);
 
@@ -38,10 +51,14 @@ public class SyncScheduler {
         AppLogger.d(context.getClass(), "⏰ Next hourly sync scheduled at: " + triggerAt);
 
         // Schedule fallback using WorkManager for aggressive devices
-        SyncWorker.enqueuePeriodicWork(context);
+        SyncWorker.enqueuePeriodicWork(context, hours);
     }
 
-    /** Cancel hourly sync */
+    /**
+     * Cancels the hourly sync.
+     *
+     * @param context The application context.
+     */
     public static void cancelHourlySync(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, SyncReceiver.class);

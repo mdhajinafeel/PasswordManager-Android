@@ -62,30 +62,10 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
         return new SettingsFragment();
     }
 
-    public static Bundle getStoredBundleValue(String title) {
-        Bundle bundleOBJ = new Bundle();
-        try {
-            bundleOBJ.putString("Title", title);
-        } catch (Exception e) {
-            AppLogger.e(getInstance().getClass(), "Error getStoredBundleValue", e);
-        }
-        return bundleOBJ;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
-
-//        notificationPermissionLauncher =
-//                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-//                    if (isGranted) {
-//                        Toast.makeText(getActivity(), "Notification permission granted", Toast.LENGTH_SHORT).show();
-//                        startSyncService();
-//                    } else {
-//                        Toast.makeText(getActivity(), "Permission denied!", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
 
         try {
 

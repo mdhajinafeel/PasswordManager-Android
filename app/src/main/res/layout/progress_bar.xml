@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#BF000000"
-    android:clickable="true"
-    android:focusable="true"
+    android:clickable="false"
+    android:focusable="false"
     android:descendantFocusability="blocksDescendants"
     android:importantForAccessibility="no"
     android:gravity="center">

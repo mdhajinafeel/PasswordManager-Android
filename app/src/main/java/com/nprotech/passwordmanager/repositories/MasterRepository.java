@@ -58,21 +58,13 @@ public class MasterRepository {
                 if (downloadMasterDataResponse != null) {
 
                     List<CategoriesResponse> categoriesResponse = downloadMasterDataResponse.getCategories();
+
                     if (categoriesResponse != null && !categoriesResponse.isEmpty()) {
 
-                        deleteCategories();
-
-                        List<CategoryEntity> categoryEntityList = new ArrayList<>();
-                        for (CategoriesResponse category : categoriesResponse) {
-                            CategoryEntity categoryEntity = new CategoryEntity();
-                            categoryEntity.setId(category.getId());
-                            categoryEntity.setCategoryName(category.getCategoryName());
-                            categoryEntity.setIconText(category.getIconText());
-
-                            categoryEntityList.add(categoryEntity);
-                        }
+                        List<CategoryEntity> categoryEntityList = mapCategoriesToEntities(categoriesResponse);
 
                         if (!categoryEntityList.isEmpty()) {
+                            deleteCategories();
                             insertCategories(categoryEntityList);
                         }
                     }
@@ -102,6 +94,26 @@ public class MasterRepository {
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error masterDownload", e);
         }
+    }
+
+    private List<CategoryEntity> mapCategoriesToEntities(List<CategoriesResponse> categoriesResponse) {
+        List<CategoryEntity> categoryEntityList = new ArrayList<>();
+
+        if (categoriesResponse == null || categoriesResponse.isEmpty()) {
+            return categoryEntityList;
+        }
+
+        for (CategoriesResponse category : categoriesResponse) {
+            CategoryEntity entity = new CategoryEntity();
+            entity.setId(category.getId());
+            entity.setCategoryName(category.getCategoryName());
+            entity.setIconText(category.getIconText());
+            entity.setColorCode(category.getColorCode());
+
+            categoryEntityList.add(entity);
+        }
+
+        return categoryEntityList;
     }
 
     public Call<DownloadMasterResponse> manualMasterDownload() {

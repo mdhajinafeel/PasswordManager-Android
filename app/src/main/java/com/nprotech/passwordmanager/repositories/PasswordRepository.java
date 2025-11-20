@@ -1,11 +1,11 @@
 package com.nprotech.passwordmanager.repositories;
 
-import android.util.Base64;
-
 import com.nprotech.passwordmanager.db.dao.PasswordDao;
 import com.nprotech.passwordmanager.db.entities.PasswordEntity;
 import com.nprotech.passwordmanager.model.PasswordModel;
 import com.nprotech.passwordmanager.model.request.PasswordRequest;
+import com.nprotech.passwordmanager.model.response.PasswordResponse;
+import com.nprotech.passwordmanager.services.IPasswordApiService;
 import com.nprotech.passwordmanager.utils.AppLogger;
 
 import java.util.List;
@@ -13,13 +13,17 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import retrofit2.Call;
+
 @Singleton
 public class PasswordRepository {
 
+    private final IPasswordApiService passwordApiService;
     private final PasswordDao passwordDao;
 
     @Inject
-    public PasswordRepository(PasswordDao passwordDao) {
+    public PasswordRepository(IPasswordApiService passwordApiService, PasswordDao passwordDao) {
+        this.passwordApiService = passwordApiService;
         this.passwordDao = passwordDao;
     }
 
@@ -35,23 +39,15 @@ public class PasswordRepository {
         return passwordDao.getPassword(timeStamp);
     }
 
-    public long savePassword(PasswordEntity passwordEntity) {
+    public Call<PasswordResponse> savePassword(PasswordRequest passwordRequest) {
+        return passwordApiService.savePassword(passwordRequest);
+    }
+
+    public long savePasswordDB(PasswordEntity passwordEntity) {
 
         long savePassword = 0;
 
         try {
-
-            PasswordRequest passwordRequest = new PasswordRequest();
-            passwordRequest.setTimeStamp(passwordEntity.getTimeStamp());
-            passwordRequest.setApplicationName(passwordEntity.getApplicationName());
-            passwordRequest.setUserName(passwordEntity.getUserName());
-            passwordRequest.setLink(passwordEntity.getLink());
-            passwordRequest.setCategory(passwordEntity.getCategory());
-            passwordRequest.setFavourite(passwordEntity.isFavourite());
-            passwordRequest.setIconId(passwordEntity.getIconId());
-            passwordRequest.setCustomIcon(passwordEntity.isCustomIcon());
-            passwordRequest.setIcon(Base64.encodeToString(passwordEntity.getIcon(), Base64.NO_WRAP));
-
             savePassword = passwordDao.insertPassword(passwordEntity);
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error savePassword", e);

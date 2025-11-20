@@ -6,14 +6,10 @@ import java.io.Serializable;
 public class CategoriesResponse implements Serializable {
 
     private int id;
-    private String categoryName, iconText;
+    private String categoryName, iconText, colorCode;
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getCategoryName() {
@@ -22,5 +18,9 @@ public class CategoriesResponse implements Serializable {
 
     public String getIconText() {
         return iconText;
+    }
+
+    public String getColorCode() {
+        return colorCode;
     }
 }

@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorDimBlue">
+    android:layout_height="match_parent">
 
     <!-- Toolbar -->
     <include
@@ -19,8 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
+        android:paddingBottom="@dimen/padding_55"
         android:layout_margin="@dimen/margin_10"
-        android:clipToPadding="true"
+        android:clipToPadding="false"
         android:isScrollContainer="true"
         android:nestedScrollingEnabled="true"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

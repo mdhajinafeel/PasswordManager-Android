@@ -10,4 +10,7 @@ public class Urls {
 
     //Masters
     public static final String masterDownload = "masters/downloadmasters";
+
+    //Passwords
+    public static final String savePassword = "passwords/savepassword";
 }

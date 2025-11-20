@@ -54,16 +54,6 @@ public class HomeFragment extends Fragment {
         return new HomeFragment();
     }
 
-    public static Bundle getStoredBundleValue(String title) {
-        Bundle bundleOBJ = new Bundle();
-        try {
-            bundleOBJ.putString("Title", title);
-        } catch (Exception e) {
-            AppLogger.e(getInstance().getClass(), "Error getStoredBundleValue", e);
-        }
-        return bundleOBJ;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -101,6 +91,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull PasswordModel item) {
                         try {
+
                             holder.setViewText(R.id.tvApplicationName, item.getApplicationName());
                             holder.setViewText(R.id.tvUsername, item.getUserName());
 
@@ -287,9 +278,9 @@ public class HomeFragment extends Fragment {
                     if (isPasswordSaved && newPassword != null) {
 
                         if (passwordEntityCommonRecyclerViewAdapter != null) {
-                            passwordEntityCommonRecyclerViewAdapter.addItem(newPassword);
-                            int position = passwordEntityCommonRecyclerViewAdapter.getItemCount() - 1;
-                            passwordEntityCommonRecyclerViewAdapter.notifyItemInserted(position);
+                            passwordEntityCommonRecyclerViewAdapter.addItemAtTop(newPassword);
+                            passwordEntityCommonRecyclerViewAdapter.notifyItemInserted(0);
+                            rvPasswordList.scrollToPosition(0); // optional: auto-scroll to top
                         } else {
                             fetchPasswords();
                         }

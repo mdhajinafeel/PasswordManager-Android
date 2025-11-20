@@ -74,7 +74,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:paddingVertical="4dp"
-        android:clipToPadding="true"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/view"
         app:layout_constraintBottom_toTopOf="@id/btnLogout"
         app:layout_constraintStart_toStartOf="parent"

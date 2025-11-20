@@ -10,10 +10,19 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 
+/**
+ * Hilt module that provides application-level dependencies.
+ */
 @Module
 @InstallIn(SingletonComponent.class)
 public class AppModule {
 
+    /**
+     * Provides the application context.
+     *
+     * @param application The application instance.
+     * @return The application context.
+     */
     @Provides
     @Singleton
     Context provideApplicationContext(Application application) {

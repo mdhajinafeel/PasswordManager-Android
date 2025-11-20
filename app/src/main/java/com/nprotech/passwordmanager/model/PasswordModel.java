@@ -7,7 +7,7 @@ public class PasswordModel implements Serializable {
 
     private int iconId, id, databaseId, categoryId, passwordStrength;
     private long timeStamp;
-    private String applicationName, password, userName, category;
+    private String applicationName, password, userName, category, colorCode;
     private boolean isFavourite, isCustomIcon;
     private byte[] icon;
 
@@ -113,5 +113,13 @@ public class PasswordModel implements Serializable {
 
     public void setPasswordStrength(int passwordStrength) {
         this.passwordStrength = passwordStrength;
+    }
+
+    public String getColorCode() {
+        return colorCode;
+    }
+
+    public void setColorCode(String colorCode) {
+        this.colorCode = colorCode;
     }
 }

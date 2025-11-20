@@ -15,7 +15,7 @@ public interface PasswordDao {
 
     @Query("SELECT pwd.passwordStrength AS passwordStrength, pwd.id AS id, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
             "pwd.isCustomIcon AS isCustomIcon, pwd.isFavourite AS isFavourite, pwd.category AS categoryId, ctg.categoryName AS category," +
-            "CASE WHEN pwd.isCustomIcon = 1 THEN pwd.icon ELSE icn.icon END AS icon " +
+            "CASE WHEN pwd.isCustomIcon = 1 THEN pwd.icon ELSE icn.icon END AS icon, ctg.colorCode AS colorCode " +
             "FROM passwords pwd " +
             "INNER JOIN categories ctg ON ctg.id = pwd.category " +
             "LEFT JOIN icons icn ON icn.id = pwd.iconId " +

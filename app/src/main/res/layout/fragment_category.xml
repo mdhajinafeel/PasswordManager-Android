@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorDimBlue">
+
+    <!-- Toolbar -->
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Search Area -->
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/etSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_15"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_marginEnd="@dimen/margin_15"
+        android:background="@drawable/bg_edittext"
+        android:cursorVisible="true"
+        android:visibility="gone"
+        android:drawableStart="@drawable/ic_search_grey"
+        android:drawablePadding="@dimen/padding_10"
+        android:fontFamily="@font/exo2_medium"
+        android:gravity="start|center_vertical"
+        android:imeOptions="actionSearch"
+        android:padding="@dimen/padding_10"
+        android:singleLine="true"
+        android:textColor="@color/colorDarkGrey"
+        android:textColorHint="@color/colorLightGrey"
+        android:textCursorDrawable="@null"
+        android:textSize="@dimen/text_12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCategories"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_10"
+        android:visibility="gone"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/padding_55"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etSearch"
+        app:spanCount="3"
+        tools:listitem="@layout/row_item_category" />
+
+    <!-- No Data -->
+    <FrameLayout
+        android:id="@+id/frameNoData"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_no_data" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvNoCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:fontFamily="@font/exo2_semibold"
+            android:text="@string/no_categories_available"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_18" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

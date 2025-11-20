@@ -24,14 +24,32 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * A {@link Worker} that performs periodic synchronization of master data.
+ * This worker is responsible for downloading the latest data from the server
+ * and updating the local database. It can be scheduled for immediate or
+ * periodic execution.
+ */
 public class SyncWorker extends Worker {
 
     private static final String UNIQUE_WORK_NAME = "MasterSyncWorker";
 
+    /**
+     * Constructs a new SyncWorker.
+     *
+     * @param context The application context.
+     * @param params  Parameters to setup the worker.
+     */
     public SyncWorker(@NonNull Context context, @NonNull WorkerParameters params) {
         super(context, params);
     }
 
+    /**
+     * The main entry point for the worker. This method is called by WorkManager to
+     * perform the sync operation.
+     *
+     * @return The result of the work, either {@link Result#success()} or {@link Result#retry()}.
+     */
     @NonNull
     @Override
     public Result doWork() {
@@ -63,7 +81,11 @@ public class SyncWorker extends Worker {
     }
 
     /**
-     * Run API sync immediately in background thread
+     * Enqueues an immediate sync operation to be run in a background thread.
+     * This method is useful for triggering a sync on-demand.
+     * It also clears the scheduler data before starting the sync.
+     *
+     * @param context The application context.
      */
     public static void enqueueImmediateSync(Context context) {
         new Thread(() -> {
@@ -96,9 +118,14 @@ public class SyncWorker extends Worker {
     }
 
     /**
-     * WorkManager periodic fallback for aggressive devices
+     * Enqueues a periodic work request using WorkManager as a fallback for devices
+     * with aggressive power-saving features.
+     * The work is scheduled with a network constraint.
+     *
+     * @param context The application context.
+     * @param hours   The interval in hours at which to repeat the sync.
      */
-    public static void enqueuePeriodicWork(Context context) {
+    public static void enqueuePeriodicWork(Context context, int hours) {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();

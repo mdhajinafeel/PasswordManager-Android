@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.fragment.app.Fragment;
@@ -14,10 +13,10 @@ import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.common.BaseActivity;
 import com.nprotech.passwordmanager.helper.PreferenceManager;
 import com.nprotech.passwordmanager.utils.AppLogger;
+import com.nprotech.passwordmanager.view.fragments.CategoryFragment;
 import com.nprotech.passwordmanager.view.fragments.ErrorDialogFragment;
 import com.nprotech.passwordmanager.view.fragments.FavoritesFragment;
 import com.nprotech.passwordmanager.view.fragments.HomeFragment;
-import com.nprotech.passwordmanager.view.fragments.SecurityFragment;
 import com.nprotech.passwordmanager.view.fragments.SettingsFragment;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
 import com.nprotech.passwordmanager.work.SyncScheduler;
@@ -30,6 +29,7 @@ public class MainActivity extends BaseActivity {
 
     private FrameLayout progressBar;
     private MasterViewModel masterViewModel;
+    private boolean isFragmentAlreadyLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +60,6 @@ public class MainActivity extends BaseActivity {
     private void initComponents() {
         try {
 
-            hideKeyboard(this);
-
             Bundle bundle = getIntent().getExtras();
 
             if (bundle != null) {
@@ -77,31 +75,33 @@ public class MainActivity extends BaseActivity {
 
             // Add Menu Items Programmatically
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(1, getString(R.string.home), R.drawable.ic_home));
-            curvedBottomNavigation.add(new CurvedBottomNavigation.Model(2, getString(R.string.search), R.drawable.ic_security));
+            curvedBottomNavigation.add(new CurvedBottomNavigation.Model(2, getString(R.string.categories), R.drawable.ic_category_menu));
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(3, getString(R.string.settings), R.drawable.ic_favorites));
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(4, getString(R.string.settings), R.drawable.ic_settings));
 
             // Set default selected item
             curvedBottomNavigation.setOnShowListener(item -> {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+                if (isFragmentAlreadyLoaded) {
+                    return null;   // ⛔ prevent fragment reload when keyboard opens
+                }
+
+                isFragmentAlreadyLoaded = true;
+
                 Fragment selectedFragment = null;
 
                 switch (item.getId()) {
                     case 1:
                         selectedFragment = HomeFragment.getInstance();
-                        selectedFragment.setArguments(HomeFragment.getStoredBundleValue(getString(R.string.app_name)));
                         break;
                     case 2:
-                        selectedFragment = SecurityFragment.getInstance();
-                        selectedFragment.setArguments(SecurityFragment.getStoredBundleValue(getString(R.string.security)));
+                        selectedFragment = CategoryFragment.getInstance();
                         break;
                     case 3:
                         selectedFragment = FavoritesFragment.getInstance();
-                        selectedFragment.setArguments(FavoritesFragment.getStoredBundleValue(getString(R.string.favourites)));
                         break;
                     case 4:
                         selectedFragment = SettingsFragment.getInstance();
-                        selectedFragment.setArguments(SettingsFragment.getStoredBundleValue(getString(R.string.settings)));
                         break;
                 }
 
@@ -115,7 +115,10 @@ public class MainActivity extends BaseActivity {
                 return null;
             });
 
-            curvedBottomNavigation.setOnClickMenuListener(model -> null);
+            curvedBottomNavigation.setOnClickMenuListener(model -> {
+                isFragmentAlreadyLoaded = false;
+                return null;
+            });
             curvedBottomNavigation.setOnReselectListener(model -> null);
 
             // Show the first item by default

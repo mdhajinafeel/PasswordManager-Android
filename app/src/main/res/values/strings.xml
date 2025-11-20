@@ -102,4 +102,6 @@
     <string name="synchronization">Synchronization</string>
     <string name="show_password">Show Password</string>
     <string name="set_as_favourite">Set as favourite</string>
+    <string name="categories">Categories</string>
+    <string name="no_categories_available">No categories available</string>
 </resources>

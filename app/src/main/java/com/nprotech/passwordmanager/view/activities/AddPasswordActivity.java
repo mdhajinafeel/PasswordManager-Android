@@ -422,7 +422,6 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                 passwordEntity.setLink(Objects.requireNonNull(etApplicationLink.getText()).toString());
                 passwordEntity.setCategory(categoryId);
                 passwordEntity.setPassword(CryptoHelper.encrypt(CommonUtils.getPasswordAlias(), etPassword.getText().toString()));
-                passwordEntity.setSynced(false);
                 passwordEntity.setIcon(imgPasswordIconArray);
                 passwordEntity.setCustomIcon(isCustomIcon);
                 passwordEntity.setIconId(iconId);
@@ -431,6 +430,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
 
                 if (bundle.getBoolean("isEdit")) {
 
+                    passwordEntity.setSynced(false);
                     passwordEntity.setTimeStamp(bundle.getLong("timeStamp"));
 
                     if (new NetworkConnectivity(this).isNetworkAvailable()) {
@@ -455,8 +455,6 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     long timeStamp = CommonUtils.getCurrentDateTimeStamp(true);
 
                     passwordEntity.setDeleted(false);
-                    passwordEntity.setFavourite(false);
-                    passwordEntity.setDatabaseId(0);
                     passwordEntity.setTimeStamp(timeStamp);
                     passwordEntity.setPasswordStrength(passwordStrength);
 

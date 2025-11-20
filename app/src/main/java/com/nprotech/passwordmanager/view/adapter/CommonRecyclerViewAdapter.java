@@ -111,6 +111,12 @@ public abstract class CommonRecyclerViewAdapter<T> extends RecyclerView.Adapter<
         this.dataList.add(item);
     }
 
+    public void addItemAtTop(T item) {
+        if (dataList != null) {
+            dataList.add(0, item);
+        }
+    }
+
     // Listener Interfaces
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
