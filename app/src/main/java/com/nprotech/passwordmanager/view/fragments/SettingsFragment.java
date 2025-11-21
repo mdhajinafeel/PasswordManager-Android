@@ -55,8 +55,6 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     private SettingsRecyclerAdapter adapter;
     private AuthViewModel loginViewModel;
     private MasterViewModel masterViewModel;
-    // Permission launcher (Android 13+)
-    //private ActivityResultLauncher<String> notificationPermissionLauncher;
 
     public static SettingsFragment getInstance() {
         return new SettingsFragment();
@@ -221,8 +219,14 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     }
 
     @Override
-    public void onSettingClick(SettingItem item, int itemId, int itemValue) {
-        if (item.getSettingId() == 4) {
+    public void onSettingClick(SettingItem item, int itemId, int itemValue, String downloadType) {
+        if (item.getSettingId() == 3) {
+            if(Objects.equals(downloadType, "Excel")) {
+                Toast.makeText(requireContext(), "Excel", Toast.LENGTH_SHORT).show();
+            } else if(Objects.equals(downloadType, "PDF")) {
+                Toast.makeText(requireContext(), "PDF", Toast.LENGTH_SHORT).show();
+            }
+        } else if (item.getSettingId() == 4) {
             if (itemId > 0) {
                 PreferenceManager.INSTANCE.setSyncId(itemId);
                 PreferenceManager.INSTANCE.setSyncHours(itemValue);

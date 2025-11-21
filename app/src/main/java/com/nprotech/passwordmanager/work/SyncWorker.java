@@ -131,7 +131,7 @@ public class SyncWorker extends Worker {
                 .build();
 
         PeriodicWorkRequest workRequest =
-                new PeriodicWorkRequest.Builder(SyncWorker.class, 15, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(SyncWorker.class, hours, TimeUnit.HOURS)
                         .setConstraints(constraints)
                         .build();
 

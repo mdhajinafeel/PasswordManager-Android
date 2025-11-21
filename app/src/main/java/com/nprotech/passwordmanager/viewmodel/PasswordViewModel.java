@@ -100,6 +100,25 @@ public class PasswordViewModel extends ViewModel {
     }
 
     /**
+     * Gets a list of all favourite passwords.
+     *
+     * @return A list of {@link PasswordModel}.
+     */
+    public List<PasswordModel> getPasswordsFavorites() {
+        return passwordRepository.getPasswordsFavorites();
+    }
+
+    /**
+     * Gets a password by its categoryId.
+     *
+     * @param categoryId The categoryId of the password to retrieve.
+     * @return The {@link PasswordEntity} corresponding to the categoryId.
+     */
+    public List<PasswordModel> getPasswordsByCategory(int categoryId) {
+        return passwordRepository.getPasswordsByCategory(categoryId);
+    }
+
+    /**
      * Gets a password model by its timestamp.
      *
      * @param timeStamp The timestamp of the password to retrieve.

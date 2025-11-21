@@ -76,7 +76,7 @@ public class MainActivity extends BaseActivity {
             // Add Menu Items Programmatically
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(1, getString(R.string.home), R.drawable.ic_home));
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(2, getString(R.string.categories), R.drawable.ic_category_menu));
-            curvedBottomNavigation.add(new CurvedBottomNavigation.Model(3, getString(R.string.settings), R.drawable.ic_favorites));
+            curvedBottomNavigation.add(new CurvedBottomNavigation.Model(3, getString(R.string.favourites), R.drawable.ic_favorites));
             curvedBottomNavigation.add(new CurvedBottomNavigation.Model(4, getString(R.string.settings), R.drawable.ic_settings));
 
             // Set default selected item

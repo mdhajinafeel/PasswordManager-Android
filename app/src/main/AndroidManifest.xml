@@ -74,6 +74,11 @@
             android:name=".view.activities.AddPasswordActivity"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Category Password Screen -->
+        <activity
+            android:name=".view.activities.CategoryPasswordActivity"
+            android:windowSoftInputMode="adjustResize" />
+
         <receiver
             android:name=".work.BootReceiver"
             android:enabled="true"

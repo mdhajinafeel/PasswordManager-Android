@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorDimBlue">
+    android:layout_height="match_parent">
 
     <!-- Toolbar -->
     <include
@@ -12,5 +12,44 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPasswordList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:paddingBottom="@dimen/padding_55"
+        android:layout_margin="@dimen/margin_10"
+        android:visibility="gone"
+        android:clipToPadding="false"
+        android:isScrollContainer="true"
+        android:nestedScrollingEnabled="true"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/row_item_passwords" />
+
+    <!-- No Data -->
+    <FrameLayout
+        android:id="@+id/frameNoData"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:visibility="visible"
+        android:layout_centerInParent="true">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_no_data" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvNoCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:fontFamily="@font/exo2_semibold"
+            android:text="@string/no_passwords_available"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_18" />
+
+    </FrameLayout>
 
 </RelativeLayout>

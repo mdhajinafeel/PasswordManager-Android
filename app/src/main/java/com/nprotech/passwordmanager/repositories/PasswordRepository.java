@@ -31,12 +31,20 @@ public class PasswordRepository {
         return passwordDao.getPasswords();
     }
 
+    public List<PasswordModel> getPasswordsFavorites() {
+        return passwordDao.getPasswordsFavorites();
+    }
+
     public PasswordModel getPasswordModel(long timeStamp) {
         return passwordDao.getPasswordModel(timeStamp);
     }
 
     public PasswordEntity getPassword(long timeStamp) {
         return passwordDao.getPassword(timeStamp);
+    }
+
+    public List<PasswordModel> getPasswordsByCategory(int categoryId) {
+        return passwordDao.getPasswordsByCategory(categoryId);
     }
 
     public Call<PasswordResponse> savePassword(PasswordRequest passwordRequest) {

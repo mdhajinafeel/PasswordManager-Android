@@ -29,6 +29,10 @@ public class CategoryEntity implements Serializable {
      * The color code of the category.
      */
     private String colorCode;
+    /**
+     * The password count of the category.
+     */
+    public int passwordCount;
 
     /**
      * Gets the unique identifier of the category.
@@ -100,5 +104,23 @@ public class CategoryEntity implements Serializable {
      */
     public void setColorCode(String colorCode) {
         this.colorCode = colorCode;
+    }
+
+    /**
+     * Gets the password count of the category.
+     *
+     * @return The password count.
+     */
+    public int getPasswordCount() {
+        return passwordCount;
+    }
+
+    /**
+     * Sets the password count of the category.
+     *
+     * @param passwordCount The category password count to set.
+     */
+    public void setPasswordCount(int passwordCount) {
+        this.passwordCount = passwordCount;
     }
 }

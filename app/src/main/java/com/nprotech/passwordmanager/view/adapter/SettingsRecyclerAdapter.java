@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -26,7 +25,7 @@ import java.util.List;
 public class SettingsRecyclerAdapter extends RecyclerView.Adapter<SettingsRecyclerAdapter.ViewHolder> {
 
     public interface OnSettingActionListener {
-        void onSettingClick(SettingItem item, int itemId, int itemValue);
+        void onSettingClick(SettingItem item, int itemId, int itemValue, String downloadType);
 
         void onSwitchToggle(SettingItem item, boolean isChecked, LabeledSwitch switchButton);
     }
@@ -90,13 +89,11 @@ public class SettingsRecyclerAdapter extends RecyclerView.Adapter<SettingsRecycl
             holder.downloadContainer.setVisibility(View.VISIBLE);
 
             holder.ivExcel.setOnClickListener(v -> {
-                Toast.makeText(context, "Excel Clicked1", Toast.LENGTH_SHORT).show();
-                Toast.makeText(context, "Excel Clicked", Toast.LENGTH_SHORT).show();
+                listener.onSettingClick(item, 0, 0, "Excel");
             });
 
             holder.ivPdf.setOnClickListener(v -> {
-                Toast.makeText(context, "Pdf Clicked1", Toast.LENGTH_SHORT).show();
-                Toast.makeText(context, "Pdf Clicked", Toast.LENGTH_SHORT).show();
+                listener.onSettingClick(item, 0, 0, "PDF");
             });
 
         } else if (item.getSettingId() == 4) {
@@ -119,7 +116,7 @@ public class SettingsRecyclerAdapter extends RecyclerView.Adapter<SettingsRecycl
                     SyncInterval selected = intervals.get(pos);
                     item.setSelectedValue(selected.getLabel());
                     if (listener != null)
-                        listener.onSettingClick(item, selected.getId(), selected.getHours());
+                        listener.onSettingClick(item, selected.getId(), selected.getHours(), null);
                     isUserSelection[0] = false;
                 }
 
@@ -138,7 +135,7 @@ public class SettingsRecyclerAdapter extends RecyclerView.Adapter<SettingsRecycl
             holder.spinnerContainer.setVisibility(View.GONE);
             holder.downloadContainer.setVisibility(View.GONE);
             holder.itemView.setOnClickListener(v -> {
-                if (listener != null) listener.onSettingClick(item, 0, 0);
+                if (listener != null) listener.onSettingClick(item, 0, 0, null);
             });
         }
     }

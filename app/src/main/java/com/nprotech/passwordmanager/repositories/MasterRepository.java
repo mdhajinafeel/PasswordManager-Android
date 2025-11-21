@@ -2,6 +2,8 @@ package com.nprotech.passwordmanager.repositories;
 
 import android.util.Base64;
 
+import androidx.lifecycle.LiveData;
+
 import com.nprotech.passwordmanager.db.dao.CategoryDao;
 import com.nprotech.passwordmanager.db.dao.IconDao;
 import com.nprotech.passwordmanager.db.dao.SchedulerDao;
@@ -131,6 +133,10 @@ public class MasterRepository {
 
     public List<CategoryEntity> getAllCategories() {
         return categoryDao.getAllCategories();
+    }
+
+    public CategoryEntity getCategoryById(int id) {
+        return categoryDao.getCategoryById(id);
     }
 
     //ICONS

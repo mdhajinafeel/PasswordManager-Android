@@ -50,7 +50,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginBottom="@dimen/margin_10"
                 android:textColor="@color/colorDarkGrey"
-                android:fontFamily="@font/exo2_regular"
+                android:fontFamily="@font/exo2_medium"
                 android:textSize="@dimen/text_10"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

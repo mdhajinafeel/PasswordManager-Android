@@ -1,5 +1,6 @@
 package com.nprotech.passwordmanager.view.fragments;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.db.entities.CategoryEntity;
 import com.nprotech.passwordmanager.utils.AppLogger;
+import com.nprotech.passwordmanager.view.activities.CategoryPasswordActivity;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
 import com.nprotech.passwordmanager.view.adapter.ViewHolder;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
@@ -70,8 +73,9 @@ public class CategoryFragment extends Fragment {
 
     private void fetchCategories() {
         try {
-            List<CategoryEntity> categories = masterViewModel.getAllCategories();
-            if (!categories.isEmpty()) {
+            masterViewModel.getAllCategoriesLiveData();
+            masterViewModel.getCategoryEntityLiveData().observe(requireActivity(), categoryEntities -> {
+                List<CategoryEntity> categories = new ArrayList<>(categoryEntities);
 
                 categoryEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(
                         requireContext(), categories, R.layout.row_item_category) {
@@ -79,7 +83,9 @@ public class CategoryFragment extends Fragment {
                     public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull CategoryEntity item) {
 
                         holder.setViewText(R.id.tvCategoryName, item.getCategoryName());
-                        holder.setViewText(R.id.tvCategoryPassword, "0 Password");
+
+                        String passwordText = getResources().getQuantityString(R.plurals.password_count, item.getPasswordCount(), item.getPasswordCount());
+                        holder.setViewText(R.id.tvCategoryPassword, passwordText);
 
                         CardView layoutForeground = holder.getView(R.id.layoutForeground);
                         layoutForeground.setCardBackgroundColor(Color.parseColor(item.getColorCode()));
@@ -100,6 +106,12 @@ public class CategoryFragment extends Fragment {
                         } else {
                             holder.setViewImageDrawable(R.id.ivCategory, ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_category));
                         }
+
+                        layoutForeground.setOnClickListener(v -> {
+                            Intent intent = new Intent(requireContext(), CategoryPasswordActivity.class);
+                            intent.putExtra("categoryId", item.getId());
+                            startActivity(intent);
+                        });
                     }
                 };
 
@@ -124,11 +136,8 @@ public class CategoryFragment extends Fragment {
                         filterList(s.toString());
                     }
                 });
-            } else {
-                etSearch.setVisibility(View.GONE);
-                rvCategories.setVisibility(View.GONE);
-                frameNoData.setVisibility(View.VISIBLE);
-            }
+            });
+
         } catch (Exception e) {
             AppLogger.e(getClass(), "Error fetchCategories", e);
         }

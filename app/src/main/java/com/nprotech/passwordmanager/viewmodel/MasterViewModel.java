@@ -36,6 +36,7 @@ public class MasterViewModel extends ViewModel {
     private final MutableLiveData<Boolean> progressState = new MutableLiveData<>();
     private final MutableLiveData<String> errorTitle = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<List<CategoryEntity>> categoryEntityLiveData = new MutableLiveData<>();
 
     @Inject
     public MasterViewModel(@ApplicationContext Context context, MasterRepository masterRepository) {
@@ -75,11 +76,11 @@ public class MasterViewModel extends ViewModel {
                         }
 
                         List<IconsResponse> iconsResponse = downloadMasterDataResponse.getIcons();
-                        if(iconsResponse != null && !iconsResponse.isEmpty()) {
+                        if (iconsResponse != null && !iconsResponse.isEmpty()) {
                             masterRepository.deleteIcons();
 
                             List<IconEntity> iconEntityList = new ArrayList<>();
-                            for(IconsResponse icon : iconsResponse) {
+                            for (IconsResponse icon : iconsResponse) {
                                 IconEntity iconEntity = new IconEntity();
                                 iconEntity.setId(icon.getId());
                                 iconEntity.setName(icon.getIconName());
@@ -88,7 +89,7 @@ public class MasterViewModel extends ViewModel {
                                 iconEntityList.add(iconEntity);
                             }
 
-                            if(!iconEntityList.isEmpty()){
+                            if (!iconEntityList.isEmpty()) {
                                 masterRepository.insertIcons(iconEntityList);
                             }
                         }
@@ -119,6 +120,18 @@ public class MasterViewModel extends ViewModel {
 
     public List<CategoryEntity> getAllCategories() {
         return masterRepository.getAllCategories();
+    }
+
+    public CategoryEntity getCategoryById(int id) {
+        return masterRepository.getCategoryById(id);
+    }
+
+    public void getAllCategoriesLiveData() {
+        categoryEntityLiveData.postValue(masterRepository.getAllCategories());
+    }
+
+    public LiveData<List<CategoryEntity>> getCategoryEntityLiveData() {
+        return categoryEntityLiveData;
     }
 
     public List<IconEntity> getAllIcons() {

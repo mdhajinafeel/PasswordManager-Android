@@ -1,4 +1,4 @@
-package com.nprotech.passwordmanager.view.fragments;
+package com.nprotech.passwordmanager.view.activities;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -13,33 +13,31 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.nprotech.passwordmanager.R;
+import com.nprotech.passwordmanager.common.BaseActivity;
+import com.nprotech.passwordmanager.db.entities.CategoryEntity;
 import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.model.PasswordModel;
 import com.nprotech.passwordmanager.utils.AppLogger;
 import com.nprotech.passwordmanager.utils.CommonUtils;
-import com.nprotech.passwordmanager.view.activities.AddPasswordActivity;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
 import com.nprotech.passwordmanager.view.adapter.ViewHolder;
+import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
 import com.nprotech.passwordmanager.viewmodel.PasswordViewModel;
 
 import java.util.List;
@@ -47,52 +45,70 @@ import java.util.List;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class HomeFragment extends Fragment {
+public class CategoryPasswordActivity extends BaseActivity {
 
-    private RecyclerView rvPasswordList;
     private PasswordViewModel passwordViewModel;
+    private RecyclerView rvPasswordList;
     private FrameLayout frameNoData;
     private CommonRecyclerViewAdapter<PasswordModel> passwordEntityCommonRecyclerViewAdapter;
     private RecyclerView.ViewHolder currentSwipedHolder;
+    private int categoryId;
 
-    public static HomeFragment getInstance() {
-        return new HomeFragment();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        try {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_category_passwords);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().hide();
+            }
+
+            initComponents();
+
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error onCreate", e);
+        }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+    private void initComponents() {
         try {
-            AppCompatTextView txtTitle = view.findViewById(R.id.txtTitle);
-            AppCompatImageView ivAddPassword = view.findViewById(R.id.ivAddPassword);
-            rvPasswordList = view.findViewById(R.id.rvPasswordList);
-            frameNoData = view.findViewById(R.id.frameNoData);
 
+            hideKeyboard(this);
+
+            AppCompatTextView txtTitle = findViewById(R.id.txtTitle);
+            AppCompatImageView icBack = findViewById(R.id.icBack);
+            rvPasswordList = findViewById(R.id.rvPasswordList);
+            frameNoData = findViewById(R.id.frameNoData);
+
+            MasterViewModel masterViewModel = new ViewModelProvider(this).get(MasterViewModel.class);
             passwordViewModel = new ViewModelProvider(this).get(PasswordViewModel.class);
 
-            txtTitle.setText(getString(R.string.app_name));
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null) {
 
-            ivAddPassword.setOnClickListener(v -> {
-                Intent intent = new Intent(requireContext(), AddPasswordActivity.class);
-                intent.putExtra("isEdit", false);
-                createPasswordLauncher.launch(intent);
-            });
+                categoryId = bundle.getInt("categoryId");
 
-            fetchPasswords();
+                CategoryEntity categoryEntity = masterViewModel.getCategoryById(categoryId);
+                List<PasswordModel> passwordList = passwordViewModel.getPasswordsByCategory(categoryId);
+
+                txtTitle.setText(categoryEntity.getCategoryName());
+
+                icBack.setOnClickListener(v -> finish());
+
+                fetchPasswordsByCategory(passwordList);
+            } else {
+                finish();
+            }
         } catch (Exception e) {
-            AppLogger.e(getInstance().getClass(), "Error onCreateView", e);
+            AppLogger.e(getClass(), "Error initComponents", e);
         }
-
-        return view;
     }
 
-    private void fetchPasswords() {
+    private void fetchPasswordsByCategory(List<PasswordModel> passwordList) {
         try {
-
-            List<PasswordModel> passwordList = passwordViewModel.getPasswords();
             if (!passwordList.isEmpty()) {
-                passwordEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(requireContext(), passwordList,
+                passwordEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(this, passwordList,
                         R.layout.row_item_passwords) {
                     @Override
                     public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull PasswordModel item) {
@@ -129,11 +145,11 @@ public class HomeFragment extends Fragment {
 
                             // Copy Password
                             holder.getView(R.id.ivCopyPassword).setOnClickListener(v -> {
-                                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipboardManager clipboard = (ClipboardManager) getApplicationContext().getSystemService(Context.CLIPBOARD_SERVICE);
                                 ClipData clip = ClipData.newPlainText("password", decryptedPassword);
                                 clipboard.setPrimaryClip(clip);
 
-                                Toast.makeText(requireContext(), "Password copied", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Password copied", Toast.LENGTH_SHORT).show();
                             });
 
 
@@ -170,13 +186,13 @@ public class HomeFragment extends Fragment {
                             // Apply color to indicator
                             if (background instanceof GradientDrawable) {
                                 ((GradientDrawable) background).setColor(
-                                        ContextCompat.getColor(requireContext(), colorRes)
+                                        ContextCompat.getColor(getApplicationContext(), colorRes)
                                 );
                             }
 
                             // Set text + text color
                             tvStrengthLabel.setText(getString(textRes));
-                            tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
+                            tvStrengthLabel.setTextColor(ContextCompat.getColor(getApplicationContext(), colorRes));
 
                             // Swipe
                             holder.getView(R.id.ivEdit).setOnClickListener(v -> {
@@ -189,7 +205,7 @@ public class HomeFragment extends Fragment {
                                 Toast.makeText(v.getContext(), "Deleted " + item.getTimeStamp(), Toast.LENGTH_SHORT).show();
                             });
                         } catch (Exception e) {
-                            AppLogger.e(getInstance().getClass(), "Error Password List", e);
+                            AppLogger.e(getClass(), "Error Password List", e);
                         }
 
                     }
@@ -204,7 +220,7 @@ public class HomeFragment extends Fragment {
                 frameNoData.setVisibility(View.VISIBLE);
             }
         } catch (Exception e) {
-            AppLogger.e(getInstance().getClass(), "Error fetchPasswords", e);
+            AppLogger.e(getClass(), "Error fetchPasswordsByCategory", e);
         }
     }
 
@@ -279,7 +295,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void editPassword(PasswordModel passwordModel) {
-        Intent intent = new Intent(requireContext(), AddPasswordActivity.class);
+        Intent intent = new Intent(this, AddPasswordActivity.class);
         intent.putExtra("timeStamp", passwordModel.getTimeStamp());
         intent.putExtra("isEdit", true);
         createPasswordLauncher.launch(intent);
@@ -301,13 +317,14 @@ public class HomeFragment extends Fragment {
                             passwordEntityCommonRecyclerViewAdapter.notifyItemInserted(0);
                             rvPasswordList.scrollToPosition(0); // optional: auto-scroll to top
                         } else {
-                            fetchPasswords();
+                            List<PasswordModel> passwordList = passwordViewModel.getPasswordsByCategory(categoryId);
+                            fetchPasswordsByCategory(passwordList);
                         }
 
-                        Toast.makeText(requireContext(), getString(R.string.password_saved_successfully), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.password_saved_successfully), Toast.LENGTH_SHORT).show();
                     } else if (isPasswordUpdated) {
                         passwordEntityCommonRecyclerViewAdapter.updateData(passwordViewModel.getPasswords());
-                        Toast.makeText(requireContext(), getString(R.string.password_updated_successfully), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), getString(R.string.password_updated_successfully), Toast.LENGTH_SHORT).show();
                     }
                 }
             });

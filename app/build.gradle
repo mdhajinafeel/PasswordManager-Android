@@ -61,7 +61,7 @@ android {
     }
     buildToolsVersion '36.1.0'
 
-    packaging {
+    packagingOptions {
         jniLibs {
             useLegacyPackaging = true
         }
@@ -129,6 +129,12 @@ dependencies {
     //Worker
     implementation libs.work.runtime
     implementation libs.work.runtime.ktx
+
+    //Excel
+    implementation libs.poi
+    implementation(libs.poi.ooxml) {
+        exclude group: 'org.apache.xmlbeans'
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
