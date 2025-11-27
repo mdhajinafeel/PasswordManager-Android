@@ -105,6 +105,12 @@
     <string name="categories">Categories</string>
     <string name="no_categories_available">No categories available</string>
     <string name="no_passwords_available">No passwords available</string>
+    <string name="excel_file_created">Excel file has been exported</string>
+    <string name="pdf_file_created">PDF file has been exported</string>
+    <string name="application_link">Application Link</string>
+    <string name="no_passwords_found">No passwords found</string>
+    <string name="passwords">Passwords</string>
+    <string name="unable_to_create_folder">Unable to create folder!</string>
 
     <plurals name="password_count">
         <item quantity="one">%d Password</item>

@@ -2,42 +2,59 @@ package com.nprotech.passwordmanager.model.response;
 
 import java.io.Serializable;
 
+@SuppressWarnings("unused")
 public class PasswordResponse implements Serializable {
 
-    private boolean status;
-    private String message;
-    private int passwordId;
     private long timeStamp;
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public int getPasswordId() {
-        return passwordId;
-    }
-
-    public void setPasswordId(int passwordId) {
-        this.passwordId = passwordId;
-    }
+    private int databaseId, iconId, passwordStrength, category;
+    private String applicationName, userName, icon, link, password;
+    private boolean isFavourite, isCustomIcon;
 
     public long getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public int getDatabaseId() {
+        return databaseId;
+    }
+
+    public int getIconId() {
+        return iconId;
+    }
+
+    public int getPasswordStrength() {
+        return passwordStrength;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public boolean isCustomIcon() {
+        return isCustomIcon;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

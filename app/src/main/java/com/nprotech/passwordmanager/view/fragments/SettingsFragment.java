@@ -1,13 +1,18 @@
 package com.nprotech.passwordmanager.view.fragments;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,18 +33,50 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.angads25.toggle.widget.LabeledSwitch;
 import com.google.android.material.button.MaterialButton;
+import com.itextpdf.text.Anchor;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.common.BaseActivity;
+import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.helper.PreferenceManager;
+import com.nprotech.passwordmanager.model.PasswordModel;
 import com.nprotech.passwordmanager.model.SettingItem;
 import com.nprotech.passwordmanager.utils.AppLogger;
+import com.nprotech.passwordmanager.utils.CommonUtils;
 import com.nprotech.passwordmanager.utils.SimpleDividerItemDecoration;
 import com.nprotech.passwordmanager.view.activities.MainActivity;
 import com.nprotech.passwordmanager.view.adapter.SettingsRecyclerAdapter;
 import com.nprotech.passwordmanager.viewmodel.AuthViewModel;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
+import com.nprotech.passwordmanager.viewmodel.PasswordViewModel;
 import com.nprotech.passwordmanager.work.SyncScheduler;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFHyperlink;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.util.CellRangeAddress;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +92,7 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     private SettingsRecyclerAdapter adapter;
     private AuthViewModel loginViewModel;
     private MasterViewModel masterViewModel;
+    private PasswordViewModel passwordViewModel;
 
     public static SettingsFragment getInstance() {
         return new SettingsFragment();
@@ -76,6 +114,7 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
 
             loginViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
             masterViewModel = new ViewModelProvider(this).get(MasterViewModel.class);
+            passwordViewModel = new ViewModelProvider(this).get(PasswordViewModel.class);
 
             AppCompatTextView txtTitle = view.findViewById(R.id.txtTitle);
             txtTitle.setText(getString(R.string.settings));
@@ -221,10 +260,10 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
     @Override
     public void onSettingClick(SettingItem item, int itemId, int itemValue, String downloadType) {
         if (item.getSettingId() == 3) {
-            if(Objects.equals(downloadType, "Excel")) {
-                Toast.makeText(requireContext(), "Excel", Toast.LENGTH_SHORT).show();
-            } else if(Objects.equals(downloadType, "PDF")) {
-                Toast.makeText(requireContext(), "PDF", Toast.LENGTH_SHORT).show();
+            if (Objects.equals(downloadType, "Excel")) {
+                createExcelFile();
+            } else if (Objects.equals(downloadType, "PDF")) {
+                createPdfFile();
             }
         } else if (item.getSettingId() == 4) {
             if (itemId > 0) {
@@ -250,6 +289,328 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
                         false
                 ).show(getChildFragmentManager(), "errorDialog"));
             }
+        }
+    }
+
+    private void createExcelFile() {
+
+        if (hasStoragePermission()) {
+            requestStoragePermission();
+            return;
+        }
+
+        List<PasswordModel> passwordLists = passwordViewModel.getPasswords();
+        if (passwordLists == null || passwordLists.isEmpty()) {
+            Toast.makeText(requireContext(), getString(R.string.no_passwords_found), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try (HSSFWorkbook workbook = new HSSFWorkbook()) {
+
+            HSSFSheet sheet = workbook.createSheet(getString(R.string.passwords));
+
+            // ------------------------------
+            // STYLES
+            // ------------------------------
+
+            // Title Style (Row 0)
+            HSSFCellStyle titleStyle = workbook.createCellStyle();
+            titleStyle.setAlignment(HorizontalAlignment.CENTER);
+            titleStyle.setFillForegroundColor(IndexedColors.LIGHT_TURQUOISE1.getIndex());
+            titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            titleStyle.setBorderTop(BorderStyle.THIN);
+            titleStyle.setBorderBottom(BorderStyle.THIN);
+            titleStyle.setBorderLeft(BorderStyle.THIN);
+            titleStyle.setBorderRight(BorderStyle.THIN);
+
+            HSSFFont titleFont = workbook.createFont();
+            titleFont.setBold(true);
+            titleFont.setFontName("Calibri");
+            titleFont.setFontHeightInPoints((short) 12);
+            titleStyle.setFont(titleFont);
+
+            // Header Style (Row 1)
+            HSSFCellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+
+            HSSFFont headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setFontName("Calibri");
+            headerFont.setFontHeightInPoints((short) 10);
+            headerStyle.setFont(headerFont);
+
+            // Row Style (Data Rows)
+            HSSFCellStyle rowStyle = workbook.createCellStyle();
+            rowStyle.setAlignment(HorizontalAlignment.LEFT);
+            rowStyle.setBorderTop(BorderStyle.THIN);
+            rowStyle.setBorderBottom(BorderStyle.THIN);
+            rowStyle.setBorderLeft(BorderStyle.THIN);
+            rowStyle.setBorderRight(BorderStyle.THIN);
+
+            HSSFFont rowFont = workbook.createFont();
+            rowFont.setFontName("Calibri");
+            rowFont.setFontHeightInPoints((short) 10);
+            rowStyle.setFont(rowFont);
+
+            // Hyperlink style
+            HSSFCellStyle hyperlinkStyle = workbook.createCellStyle();
+            HSSFFont hyperlinkFont = workbook.createFont();
+            hyperlinkFont.setUnderline(HSSFFont.U_SINGLE);
+            hyperlinkFont.setColor(IndexedColors.BLUE.getIndex());
+            hyperlinkFont.setFontName("Calibri");
+            hyperlinkStyle.setFont(hyperlinkFont);
+            hyperlinkStyle.setBorderTop(BorderStyle.THIN);
+            hyperlinkStyle.setBorderBottom(BorderStyle.THIN);
+            hyperlinkStyle.setBorderLeft(BorderStyle.THIN);
+            hyperlinkStyle.setBorderRight(BorderStyle.THIN);
+
+            // ------------------------------
+            // TITLE ROW (ROW 0)
+            // ------------------------------
+            HSSFRow titleRow = sheet.createRow(0);
+            HSSFCell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue(getString(R.string.passwords));
+            titleCell.setCellStyle(titleStyle);
+
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 4));
+
+            // ------------------------------
+            // HEADER ROW (ROW 1)
+            // ------------------------------
+            HSSFRow headerRow = sheet.createRow(1);
+
+            String[] headers = {
+                    getString(R.string.application_website_name),
+                    getString(R.string.username_email),
+                    getString(R.string.password_pin),
+                    getString(R.string.application_link),
+                    getString(R.string.strength)
+            };
+
+            for (int i = 0; i < headers.length; i++) {
+                HSSFCell c = headerRow.createCell(i);
+                c.setCellValue(headers[i]);
+                c.setCellStyle(headerStyle);
+            }
+
+            // Set column widths
+            for (int i = 0; i < headers.length; i++) {
+                sheet.setColumnWidth(i, 30 * 256);
+            }
+
+            // ------------------------------
+            // DATA ROWS
+            // ------------------------------
+            CreationHelper helper = workbook.getCreationHelper();
+
+            for (int i = 0; i < passwordLists.size(); i++) {
+
+                PasswordModel pm = passwordLists.get(i);
+                HSSFRow row = sheet.createRow(i + 2);
+
+                // Application Name
+                HSSFCell name = row.createCell(0);
+                name.setCellValue(pm.getApplicationName());
+                name.setCellStyle(rowStyle);
+
+                // Username
+                HSSFCell user = row.createCell(1);
+                user.setCellValue(pm.getUserName());
+                user.setCellStyle(rowStyle);
+
+                // Password
+                HSSFCell pass = row.createCell(2);
+                pass.setCellValue(CryptoHelper.decrypt(pm.getPassword()));
+                pass.setCellStyle(rowStyle);
+
+                // Application Link
+                HSSFCell linkCell = row.createCell(3);
+                if (pm.getApplicationLink() != null && !pm.getApplicationLink().isEmpty()) {
+                    linkCell.setCellValue(pm.getApplicationLink());
+                    HSSFHyperlink hyperlink = (HSSFHyperlink) helper.createHyperlink(HyperlinkType.URL);
+                    hyperlink.setAddress(pm.getApplicationLink());
+                    linkCell.setHyperlink(hyperlink);
+                    linkCell.setCellStyle(hyperlinkStyle);
+                } else {
+                    linkCell.setCellValue("-");
+                    linkCell.setCellStyle(rowStyle);
+                }
+
+                // Password Strength
+                HSSFCell strength = row.createCell(4);
+                strength.setCellValue(getStrengthText(pm.getPasswordStrength()));
+                strength.setCellStyle(rowStyle);
+            }
+
+            // ------------------------------
+            // SAVE FILE
+            // ------------------------------
+            // Folder path inside External Storage
+            File folder = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+            // Create folder if it doesn't exist
+            if (!folder.exists()) {
+                boolean created = folder.mkdirs();
+                if (!created) {
+                    Toast.makeText(requireContext(), getString(R.string.unable_to_create_folder), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            // File name with date
+            String fileName = getString(R.string.app_name) + "_" + CommonUtils.getCurrentDate() + ".xlsx";
+
+            // Create file inside the folder
+            File file = new File(folder, fileName);
+
+            // Write file
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                workbook.write(fos);
+                Toast.makeText(requireContext(), getString(R.string.excel_file_created), Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error createExcelFile", e);
+        }
+    }
+
+    private void createPdfFile() {
+
+        if (hasStoragePermission()) {
+            requestStoragePermission();
+            return;
+        }
+
+        List<PasswordModel> passwordLists = passwordViewModel.getPasswords();
+        if (passwordLists == null || passwordLists.isEmpty()) {
+            Toast.makeText(requireContext(), getString(R.string.no_passwords_found), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+
+            // ------------------------------
+            // FOLDER CREATION
+            // ------------------------------
+            File folder = new File(Environment.getExternalStorageDirectory(), getString(R.string.app_name));
+
+            if (!folder.exists()) {
+                boolean created = folder.mkdirs();
+                if (!created) {
+                    Toast.makeText(requireContext(), getString(R.string.unable_to_create_folder), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }
+
+            // ------------------------------
+            // FILE NAME
+            // ------------------------------
+            String fileName = getString(R.string.app_name) + "_" + CommonUtils.getCurrentDate() + ".pdf";
+            File file = new File(folder, fileName);
+
+            // ------------------------------
+            // PDF DOCUMENT
+            // ------------------------------
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(file));
+            document.open();
+
+            // ------------------------------
+            // FONTS
+            // ------------------------------
+            BaseColor headerBg = new BaseColor(173, 216, 230); // Light blue
+
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+            Font rowFont = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL);
+            Font linkFont = new Font(Font.FontFamily.HELVETICA, 11, Font.UNDERLINE, BaseColor.BLUE);
+
+            // ------------------------------
+            // TITLE
+            // ------------------------------
+            Paragraph title = new Paragraph(getString(R.string.passwords), titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // ------------------------------
+            // TABLE (5 columns)
+            // ------------------------------
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10);
+
+            // Column widths (similar to Excel)
+            table.setWidths(new float[]{3f, 3f, 3f, 4f, 2f});
+
+            // ------------------------------
+            // HEADER ROW
+            // ------------------------------
+            String[] headers = {
+                    getString(R.string.application_website_name),
+                    getString(R.string.username_email),
+                    getString(R.string.password_pin),
+                    getString(R.string.application_link),
+                    getString(R.string.strength)
+            };
+
+            for (String header : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+                cell.setBackgroundColor(headerBg);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(8);
+                table.addCell(cell);
+            }
+
+            // ------------------------------
+            // DATA ROWS
+            // ------------------------------
+            for (PasswordModel pm : passwordLists) {
+
+                // App name
+                table.addCell(createCell(pm.getApplicationName(), rowFont));
+
+                // Username
+                table.addCell(createCell(pm.getUserName(), rowFont));
+
+                // Password (decrypt)
+                table.addCell(createCell(
+                        CryptoHelper.decrypt(pm.getPassword()),
+                        rowFont
+                ));
+
+                // Hyperlink or "-"
+                if (pm.getApplicationLink() != null && !pm.getApplicationLink().isEmpty()) {
+                    Anchor link = new Anchor(pm.getApplicationLink(), linkFont);
+                    link.setReference(pm.getApplicationLink());
+
+                    PdfPCell linkCell = new PdfPCell();
+                    linkCell.addElement(link);
+                    linkCell.setPadding(8);
+                    table.addCell(linkCell);
+                } else {
+                    table.addCell(createCell("-", rowFont));
+                }
+
+                // Strength
+                table.addCell(createCell(getStrengthText(pm.getPasswordStrength()), rowFont));
+            }
+
+            // Add table to document
+            document.add(table);
+
+            document.close();
+
+            Toast.makeText(requireContext(), getString(R.string.pdf_file_created), Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error createPdfFile", e);
         }
     }
 
@@ -444,5 +805,64 @@ public class SettingsFragment extends Fragment implements SettingsRecyclerAdapte
             settingItems.remove(syncItemIndex);
             adapter.notifyItemRemoved(syncItemIndex);
         }
+    }
+
+    // -------------------- STORAGE PERMISSION CHECK (ALL ANDROID VERSIONS) --------------------
+    private boolean hasStoragePermission() {
+        boolean granted;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            granted = Environment.isExternalStorageManager();
+        } else {
+            granted = ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        return !granted;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            try {
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + requireActivity().getPackageName()));
+                startActivity(intent);
+            } catch (Exception e) {
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivity(intent);
+            }
+        } else {
+            requestPermissions(
+                    new String[]{
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    101
+            );
+        }
+    }
+
+    private String getStrengthText(int strength) {
+        switch (strength) {
+            case 1:
+                return getString(R.string.weak);
+            case 2:
+                return getString(R.string.medium);
+            case 3:
+                return getString(R.string.strong);
+            case 4:
+                return getString(R.string.very_strong);
+            default:
+                return getString(R.string.weak);
+        }
+    }
+
+    private PdfPCell createCell(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(8);
+        return cell;
     }
 }

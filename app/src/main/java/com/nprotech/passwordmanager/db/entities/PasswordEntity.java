@@ -8,8 +8,7 @@ import java.io.Serializable;
 @Entity(tableName = "passwords")
 public class PasswordEntity implements Serializable {
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    @PrimaryKey
     private long timeStamp;
     private int databaseId;
     private String applicationName;
@@ -24,14 +23,6 @@ public class PasswordEntity implements Serializable {
     private byte[] icon;
     private int iconId;
     private int passwordStrength;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public long getTimeStamp() {
         return timeStamp;

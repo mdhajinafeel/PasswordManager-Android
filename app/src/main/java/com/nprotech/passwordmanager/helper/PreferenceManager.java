@@ -1,14 +1,8 @@
 package com.nprotech.passwordmanager.helper;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import devliving.online.securedpreferencestore.SecuredPreferenceStore;
 
-import androidx.security.crypto.EncryptedSharedPreferences;
-import androidx.security.crypto.MasterKey;
-
-import com.nprotech.passwordmanager.utils.AppLogger;
-
-@SuppressWarnings({"deprecation", "unused"})
+@SuppressWarnings({"unused"})
 public enum PreferenceManager {
 
     INSTANCE;
@@ -29,29 +23,7 @@ public enum PreferenceManager {
     private static final String KEY_SYNC_ID = "syncId";
     private static final String KEY_SYNC_HOURS = "syncHours";
     private static final String KEY_BATTERY_OPTIMIZATION = "batteryOptimization";
-    private SharedPreferences prefStore;
-
-    // Initialize once in Application or Activity
-    public void init(Context context) {
-        try {
-            // ✅ API 23+ use EncryptedSharedPreferences
-            MasterKey masterKey = new MasterKey.Builder(context)
-                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                    .build();
-
-            prefStore = EncryptedSharedPreferences.create(
-                    context,
-                    PREF_NAME,
-                    masterKey,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-        } catch (Exception e) {
-            AppLogger.e(getClass(), "PreferenceManager Init", e);
-            // Fallback to normal SharedPreferences if encrypted fails
-            prefStore = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        }
-    }
+    private final SecuredPreferenceStore prefStore = SecuredPreferenceStore.getSharedInstance();
 
     // ===== Access Token =====
     public void setAccessToken(String token) {

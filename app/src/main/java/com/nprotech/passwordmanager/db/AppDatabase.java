@@ -21,7 +21,7 @@ import com.nprotech.passwordmanager.utils.SecureKeyManager;
 import net.sqlcipher.database.SQLiteDatabase;
 import net.sqlcipher.database.SupportFactory;
 
-@Database(entities = {CategoryEntity.class, IconEntity.class, PasswordEntity.class, SchedulerEntity.class}, version = 3)
+@Database(entities = {CategoryEntity.class, IconEntity.class, PasswordEntity.class, SchedulerEntity.class}, version = 4)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;

@@ -5,9 +5,9 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class PasswordModel implements Serializable {
 
-    private int iconId, id, databaseId, categoryId, passwordStrength;
+    private int iconId, databaseId, categoryId, passwordStrength;
     private long timeStamp;
-    private String applicationName, password, userName, category, colorCode;
+    private String applicationName, password, userName, category, applicationLink;
     private boolean isFavourite, isCustomIcon;
     private byte[] icon;
 
@@ -17,14 +17,6 @@ public class PasswordModel implements Serializable {
 
     public void setIconId(int iconId) {
         this.iconId = iconId;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public int getDatabaseId() {
@@ -115,11 +107,11 @@ public class PasswordModel implements Serializable {
         this.passwordStrength = passwordStrength;
     }
 
-    public String getColorCode() {
-        return colorCode;
+    public String getApplicationLink() {
+        return applicationLink;
     }
 
-    public void setColorCode(String colorCode) {
-        this.colorCode = colorCode;
+    public void setApplicationLink(String applicationLink) {
+        this.applicationLink = applicationLink;
     }
 }

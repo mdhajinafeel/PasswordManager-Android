@@ -11,8 +11,9 @@ import androidx.lifecycle.ViewModel;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.db.entities.PasswordEntity;
 import com.nprotech.passwordmanager.model.PasswordModel;
+import com.nprotech.passwordmanager.model.request.FavouriteRequest;
 import com.nprotech.passwordmanager.model.request.PasswordRequest;
-import com.nprotech.passwordmanager.model.response.PasswordResponse;
+import com.nprotech.passwordmanager.model.response.SavePasswordResponse;
 import com.nprotech.passwordmanager.repositories.PasswordRepository;
 import com.nprotech.passwordmanager.utils.AppLogger;
 
@@ -87,6 +88,10 @@ public class PasswordViewModel extends ViewModel {
      */
     public List<PasswordModel> getPasswords() {
         return passwordRepository.getPasswords();
+    }
+
+    public LiveData<List<PasswordModel>> getPasswordModelLiveData() {
+        return passwordRepository.getPasswordsLive();
     }
 
     /**
@@ -187,23 +192,23 @@ public class PasswordViewModel extends ViewModel {
                 passwordRequest.setFavourite(passwordEntity.isFavourite());
                 passwordRequest.setIconId(passwordEntity.getIconId());
                 passwordRequest.setCustomIcon(passwordEntity.isCustomIcon());
-                if(passwordEntity.getIcon() != null && passwordEntity.getIcon().length > 0) {
+                if (passwordEntity.getIcon() != null && passwordEntity.getIcon().length > 0) {
                     passwordRequest.setIcon(Base64.encodeToString(passwordEntity.getIcon(), Base64.NO_WRAP));
                 } else {
                     passwordRequest.setIcon(null);
                 }
 
-                Call<PasswordResponse> passwordResponseCall = passwordRepository.savePassword(passwordRequest);
+                Call<SavePasswordResponse> passwordResponseCall = passwordRepository.savePassword(passwordRequest);
                 passwordResponseCall.enqueue(new Callback<>() {
                     @Override
-                    public void onResponse(@NonNull Call<PasswordResponse> call, @NonNull Response<PasswordResponse> response) {
+                    public void onResponse(@NonNull Call<SavePasswordResponse> call, @NonNull Response<SavePasswordResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
 
-                            PasswordResponse passwordResponse = response.body();
+                            SavePasswordResponse savePasswordResponse = response.body();
 
-                            if (passwordResponse.isStatus()) {
+                            if (savePasswordResponse.isStatus()) {
 
-                                passwordEntity.setDatabaseId(passwordResponse.getPasswordId());
+                                passwordEntity.setDatabaseId(savePasswordResponse.getPasswordId());
                                 passwordEntity.setSynced(true);
 
                                 if (passwordRepository.savePasswordDB(passwordEntity) > 0) {
@@ -216,13 +221,13 @@ public class PasswordViewModel extends ViewModel {
                             } else {
                                 progressState.postValue(false);
                                 setErrorTitle(context.getString(R.string.text_error));
-                                setErrorMessage(passwordResponse.getMessage());
+                                setErrorMessage(savePasswordResponse.getMessage());
                             }
                         }
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<PasswordResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<SavePasswordResponse> call, @NonNull Throwable t) {
                         progressState.postValue(false);
                         setErrorTitle(context.getString(R.string.text_error));
                         setErrorMessage(context.getString(R.string.common_error));
@@ -256,12 +261,45 @@ public class PasswordViewModel extends ViewModel {
     }
 
     /**
+     * Saves a favourite password.
+     * It updates the progress state and save status based on the result.
+     *
+     * @param favouriteRequest The password to favourite.
+     */
+    public void favouritePassword(FavouriteRequest favouriteRequest) {
+        try {
+            progressState.postValue(true);
+            Call<SavePasswordResponse> favouriteResponseCall = passwordRepository.updateFavourite(favouriteRequest);
+            favouriteResponseCall.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<SavePasswordResponse> call, @NonNull Response<SavePasswordResponse> response) {
+                    progressState.postValue(false);
+                    if (response.isSuccessful() && response.body() != null) {
+                        SavePasswordResponse savePasswordResponse = response.body();
+                        updateFavouriteDB(savePasswordResponse.getTimeStamp(), favouriteRequest.isFavourite());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<SavePasswordResponse> call, @NonNull Throwable t) {
+                    progressState.postValue(false);
+                    updateFavouriteDB(favouriteRequest.getTimeStamp(), favouriteRequest.isFavourite());
+                    AppLogger.e(getClass(), "Error in favouritePassword", t);
+                }
+            });
+        } catch (Exception e) {
+            progressState.postValue(false);
+            AppLogger.e(getClass(), "Error in favouritePassword", e);
+        }
+    }
+
+    /**
      * Updates the favourite status of a password.
      *
      * @param timeStamp   The timestamp of the password to update.
      * @param isFavourite True to mark as favourite, false otherwise.
      */
-    public void updateFavourite(long timeStamp, boolean isFavourite) {
-        passwordRepository.updateFavourite(timeStamp, isFavourite);
+    public void updateFavouriteDB(long timeStamp, boolean isFavourite) {
+        passwordRepository.updateFavouriteDB(timeStamp, isFavourite);
     }
 }

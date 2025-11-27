@@ -35,13 +35,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.model.PasswordModel;
+import com.nprotech.passwordmanager.model.request.FavouriteRequest;
 import com.nprotech.passwordmanager.utils.AppLogger;
-import com.nprotech.passwordmanager.utils.CommonUtils;
 import com.nprotech.passwordmanager.view.activities.AddPasswordActivity;
+import com.nprotech.passwordmanager.view.activities.MainActivity;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
 import com.nprotech.passwordmanager.view.adapter.ViewHolder;
 import com.nprotech.passwordmanager.viewmodel.PasswordViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -79,6 +81,17 @@ public class FavoritesFragment extends Fragment {
                 createPasswordLauncher.launch(intent);
             });
 
+            passwordViewModel.getProgressState().observe(getViewLifecycleOwner(), isProgress -> {
+                MainActivity mainActivity = (MainActivity) getActivity();
+                if (mainActivity != null) {
+                    if (isProgress) {
+                        mainActivity.showProgress();  // call showProgress
+                    } else {
+                        mainActivity.hideProgress();  // call hideProgress
+                    }
+                }
+            });
+
             fetchPasswords();
         } catch (Exception e) {
             AppLogger.e(getInstance().getClass(), "Error onCreateView", e);
@@ -89,132 +102,147 @@ public class FavoritesFragment extends Fragment {
 
     private void fetchPasswords() {
         try {
+            passwordViewModel.getPasswordModelLiveData().observe(getViewLifecycleOwner(), passwordModels -> {
+                List<PasswordModel> passwordList = new ArrayList<>(passwordModels);
+                if (!passwordList.isEmpty()) {
+                    passwordEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(requireContext(), passwordList,
+                            R.layout.row_item_passwords) {
+                        @Override
+                        public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull PasswordModel item) {
+                            try {
 
-            List<PasswordModel> passwordList = passwordViewModel.getPasswordsFavorites();
-            if (!passwordList.isEmpty()) {
-                passwordEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(requireContext(), passwordList,
-                        R.layout.row_item_passwords) {
-                    @Override
-                    public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull PasswordModel item) {
-                        try {
+                                holder.setViewText(R.id.tvApplicationName, item.getApplicationName());
+                                holder.setViewText(R.id.tvUsername, item.getUserName());
 
-                            holder.setViewText(R.id.tvApplicationName, item.getApplicationName());
-                            holder.setViewText(R.id.tvUsername, item.getUserName());
+                                AppCompatTextView tvPassword = holder.getView(R.id.tvPassword);
+                                tvPassword.setText("••••••••");
 
-                            String decryptedPassword = CryptoHelper.decrypt(CommonUtils.getPasswordAlias(), item.getPassword());
-                            AppCompatTextView tvPassword = holder.getView(R.id.tvPassword);
-                            tvPassword.setText("••••••••");
+                                String decryptedPassword = CryptoHelper.decrypt(item.getPassword());
 
-                            // Password Toggle
-                            AppCompatCheckBox cbTogglePassword = holder.getView(R.id.cbTogglePassword);
-                            cbTogglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                                if (isChecked) {
-                                    tvPassword.setText(decryptedPassword);
-                                } else {
-                                    tvPassword.setText("••••••••");
+                                // Password Toggle
+                                AppCompatCheckBox cbTogglePassword = holder.getView(R.id.cbTogglePassword);
+                                cbTogglePassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                                    if (isChecked) {
+                                        tvPassword.setText(decryptedPassword);
+                                    } else {
+                                        tvPassword.setText("••••••••");
+                                    }
+                                });
+
+                                // Icon
+                                if (item.getIcon() != null) {
+                                    Bitmap bitmap = BitmapFactory.decodeByteArray(item.getIcon(), 0, item.getIcon().length);
+                                    holder.setViewImageBitmap(R.id.imgPasswordIcon, bitmap);
                                 }
-                            });
 
-                            // Icon
-                            if (item.getIcon() != null) {
-                                Bitmap bitmap = BitmapFactory.decodeByteArray(item.getIcon(), 0, item.getIcon().length);
-                                holder.setViewImageBitmap(R.id.imgPasswordIcon, bitmap);
-                            }
+                                // Favourite
+                                AppCompatCheckBox cbFavorite = holder.getView(R.id.cbFavorite);
 
-                            // Favourite
-                            AppCompatCheckBox cbFavorite = holder.getView(R.id.cbFavorite);
-                            cbFavorite.setChecked(item.isFavourite());
-                            cbFavorite.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                                passwordViewModel.updateFavourite(item.getTimeStamp(), isChecked);
+                                // 1. Remove previous listener
+                                cbFavorite.setOnCheckedChangeListener(null);
 
-                                List<PasswordModel> newList = passwordViewModel.getPasswordsFavorites();
-                                passwordEntityCommonRecyclerViewAdapter.updateData(newList);
+                                // 2. Set checked state WITHOUT triggering listener
+                                cbFavorite.setChecked(item.isFavourite());
 
-                                if (newList.isEmpty()) {
-                                    rvPasswordList.setVisibility(View.GONE);
-                                    frameNoData.setVisibility(View.VISIBLE);
-                                } else {
-                                    rvPasswordList.setVisibility(View.VISIBLE);
-                                    frameNoData.setVisibility(View.GONE);
+                                // 3. Re-attach listener AFTER setting checked
+                                cbFavorite.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+                                    FavouriteRequest favouriteRequest = new FavouriteRequest();
+                                    favouriteRequest.setTimeStamp(item.getTimeStamp());
+                                    favouriteRequest.setFavourite(isChecked);
+                                    passwordViewModel.favouritePassword(favouriteRequest);
+
+                                    List<PasswordModel> newList = passwordViewModel.getPasswordsFavorites();
+
+                                    rvPasswordList.post(() -> {
+                                        passwordEntityCommonRecyclerViewAdapter.updateData(newList);
+
+                                        if (newList.isEmpty()) {
+                                            rvPasswordList.setVisibility(View.GONE);
+                                            frameNoData.setVisibility(View.VISIBLE);
+                                        } else {
+                                            rvPasswordList.setVisibility(View.VISIBLE);
+                                            frameNoData.setVisibility(View.GONE);
+                                        }
+                                    });
+                                });
+
+                                // Copy Password
+                                holder.getView(R.id.ivCopyPassword).setOnClickListener(v -> {
+                                    ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText("password", decryptedPassword);
+                                    clipboard.setPrimaryClip(clip);
+
+                                    Toast.makeText(requireContext(), "Password copied", Toast.LENGTH_SHORT).show();
+                                });
+
+                                // Password Strength
+                                AppCompatTextView tvStrengthLabel = holder.getView(R.id.tvStrengthLabel);
+                                View viewStrengthIndicator = holder.getView(R.id.viewStrengthIndicator);
+                                Drawable background = viewStrengthIndicator.getBackground();
+
+                                int colorRes;
+                                int textRes;
+
+                                switch (item.getPasswordStrength()) {
+                                    case 2:
+                                        colorRes = R.color.mediumColor;
+                                        textRes = R.string.medium;
+                                        break;
+
+                                    case 3:
+                                        colorRes = R.color.strongColor;
+                                        textRes = R.string.strong;
+                                        break;
+
+                                    case 4:
+                                        colorRes = R.color.veryStrongColor;
+                                        textRes = R.string.very_strong;
+                                        break;
+
+                                    default:
+                                        colorRes = R.color.weakColor;
+                                        textRes = R.string.weak;
+                                        break;
                                 }
-                            });
 
-                            // Copy Password
-                            holder.getView(R.id.ivCopyPassword).setOnClickListener(v -> {
-                                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("password", decryptedPassword);
-                                clipboard.setPrimaryClip(clip);
+                                // Apply color to indicator
+                                if (background instanceof GradientDrawable) {
+                                    ((GradientDrawable) background).setColor(
+                                            ContextCompat.getColor(requireContext(), colorRes)
+                                    );
+                                }
 
-                                Toast.makeText(requireContext(), "Password copied", Toast.LENGTH_SHORT).show();
-                            });
+                                // Set text + text color
+                                tvStrengthLabel.setText(getString(textRes));
+                                tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
 
+                                // Swipe
+                                holder.getView(R.id.ivEdit).setOnClickListener(v -> {
+                                    closeSwipe(holder);
+                                    editPassword(item);
+                                });
 
-                            // Password Strength
-                            AppCompatTextView tvStrengthLabel = holder.getView(R.id.tvStrengthLabel);
-                            View viewStrengthIndicator = holder.getView(R.id.viewStrengthIndicator);
-                            Drawable background = viewStrengthIndicator.getBackground();
-
-                            int colorRes;
-                            int textRes;
-
-                            switch (item.getPasswordStrength()) {
-                                case 2:
-                                    colorRes = R.color.mediumColor;
-                                    textRes = R.string.medium;
-                                    break;
-
-                                case 3:
-                                    colorRes = R.color.strongColor;
-                                    textRes = R.string.strong;
-                                    break;
-
-                                case 4:
-                                    colorRes = R.color.veryStrongColor;
-                                    textRes = R.string.very_strong;
-                                    break;
-
-                                default:
-                                    colorRes = R.color.weakColor;
-                                    textRes = R.string.weak;
-                                    break;
+                                holder.getView(R.id.ivDelete).setOnClickListener(v -> {
+                                    closeSwipe(holder);
+                                    Toast.makeText(v.getContext(), "Deleted " + item.getTimeStamp(), Toast.LENGTH_SHORT).show();
+                                });
+                            } catch (Exception e) {
+                                AppLogger.e(getInstance().getClass(), "Error Password List", e);
                             }
 
-                            // Apply color to indicator
-                            if (background instanceof GradientDrawable) {
-                                ((GradientDrawable) background).setColor(
-                                        ContextCompat.getColor(requireContext(), colorRes)
-                                );
-                            }
-
-                            // Set text + text color
-                            tvStrengthLabel.setText(getString(textRes));
-                            tvStrengthLabel.setTextColor(ContextCompat.getColor(requireContext(), colorRes));
-
-                            // Swipe
-                            holder.getView(R.id.ivEdit).setOnClickListener(v -> {
-                                closeSwipe(holder);
-                                editPassword(item);
-                            });
-
-                            holder.getView(R.id.ivDelete).setOnClickListener(v -> {
-                                closeSwipe(holder);
-                                Toast.makeText(v.getContext(), "Deleted " + item.getTimeStamp(), Toast.LENGTH_SHORT).show();
-                            });
-                        } catch (Exception e) {
-                            AppLogger.e(getInstance().getClass(), "Error Password List", e);
                         }
+                    };
 
-                    }
-                };
-
-                rvPasswordList.setAdapter(passwordEntityCommonRecyclerViewAdapter);
-                rvPasswordList.setVisibility(View.VISIBLE);
-                frameNoData.setVisibility(View.GONE);
-                setupSwipeToReveal();
-            } else {
-                rvPasswordList.setVisibility(View.GONE);
-                frameNoData.setVisibility(View.VISIBLE);
-            }
+                    rvPasswordList.setAdapter(passwordEntityCommonRecyclerViewAdapter);
+                    rvPasswordList.setVisibility(View.VISIBLE);
+                    frameNoData.setVisibility(View.GONE);
+                    setupSwipeToReveal();
+                } else {
+                    rvPasswordList.setVisibility(View.GONE);
+                    frameNoData.setVisibility(View.VISIBLE);
+                }
+            });
         } catch (Exception e) {
             AppLogger.e(getInstance().getClass(), "Error fetchPasswords", e);
         }

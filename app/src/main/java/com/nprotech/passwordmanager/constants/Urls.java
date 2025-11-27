@@ -13,4 +13,5 @@ public class Urls {
 
     //Passwords
     public static final String savePassword = "passwords/savepassword";
+    public static final String favouritePassword = "passwords/favourite";
 }

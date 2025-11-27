@@ -14,8 +14,6 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Base64;
 
-import com.nprotech.passwordmanager.helper.PreferenceManager;
-
 public class CommonUtils {
 
     //API Constants
@@ -85,17 +83,22 @@ public class CommonUtils {
     }
 
     public static Long getCurrentDateTimeStamp(boolean isRandomRequired) {
-        long timestamp = Calendar.getInstance().getTimeInMillis();
-        long random = 0;
+        long timestamp = System.currentTimeMillis();
 
-        if(isRandomRequired) {
-            random = 10000 + ThreadLocalRandom.current().nextLong(1000, 9999); // 4-digit random
+        if (isRandomRequired) {
+            long random = ThreadLocalRandom.current().nextLong(1000, 9999); // 4-digit
+            return Long.parseLong(random + "" + timestamp); // Prefix + timestamp
         }
 
-        return timestamp + random; // Combine for unique long
+        return timestamp;
     }
 
-    public static String getPasswordAlias() {
-        return "pm_master_key_" + PreferenceManager.INSTANCE.getSecretKey();
+    public static String getCurrentDate() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        return  day + "_" + month + "_" + year;
     }
 }

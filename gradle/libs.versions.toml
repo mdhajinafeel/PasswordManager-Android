@@ -11,6 +11,7 @@ firebaseAuth = "24.0.1"
 firebaseMessaging = "25.0.1"
 googleServices = "4.4.4"
 hiltAndroid = "2.57.2"
+itextg = "5.5.10"
 junit = "4.13.2"
 kotlinxCoroutinesAndroid = "1.10.2"
 lifecycleViewmodel = "2.10.0"
@@ -21,6 +22,7 @@ playServicesAuth = "21.4.0"
 poi = "5.5.0"
 retrofit = "3.0.0"
 roomRuntime = "2.8.4"
+securedpreferencestore = "0.7.4"
 securityCryptoVersion = "1.1.0"
 sqlite = "2.6.2"
 toggle = "1.1.0"
@@ -40,6 +42,7 @@ google-services = { module = "com.google.gms:google-services", version.ref = "go
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroid" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
+itextg = { module = "com.itextpdf:itextg", version.ref = "itextg" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-v121 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
@@ -50,10 +53,10 @@ lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material-v1120 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 poi = { module = "org.apache.poi:poi", version.ref = "poi" }
-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+securedpreferencestore = { module = "online.devliving:securedpreferencestore", version.ref = "securedpreferencestore" }
 security-crypto-v110alpha04 = { module = "androidx.security:security-crypto", version.ref = "securityCryptoVersion" }
 sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
 toggle = { module = "com.github.angads25:toggle", version.ref = "toggle" }

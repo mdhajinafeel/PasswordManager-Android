@@ -1,10 +1,13 @@
 package com.nprotech.passwordmanager.repositories;
 
+import androidx.lifecycle.LiveData;
+
 import com.nprotech.passwordmanager.db.dao.PasswordDao;
 import com.nprotech.passwordmanager.db.entities.PasswordEntity;
 import com.nprotech.passwordmanager.model.PasswordModel;
+import com.nprotech.passwordmanager.model.request.FavouriteRequest;
 import com.nprotech.passwordmanager.model.request.PasswordRequest;
-import com.nprotech.passwordmanager.model.response.PasswordResponse;
+import com.nprotech.passwordmanager.model.response.SavePasswordResponse;
 import com.nprotech.passwordmanager.services.IPasswordApiService;
 import com.nprotech.passwordmanager.utils.AppLogger;
 
@@ -31,6 +34,10 @@ public class PasswordRepository {
         return passwordDao.getPasswords();
     }
 
+    public LiveData<List<PasswordModel>> getPasswordsLive() {
+        return passwordDao.getPasswordsLive();
+    }
+
     public List<PasswordModel> getPasswordsFavorites() {
         return passwordDao.getPasswordsFavorites();
     }
@@ -47,7 +54,7 @@ public class PasswordRepository {
         return passwordDao.getPasswordsByCategory(categoryId);
     }
 
-    public Call<PasswordResponse> savePassword(PasswordRequest passwordRequest) {
+    public Call<SavePasswordResponse> savePassword(PasswordRequest passwordRequest) {
         return passwordApiService.savePassword(passwordRequest);
     }
 
@@ -79,7 +86,11 @@ public class PasswordRepository {
 
     }
 
-    public void updateFavourite(long timeStamp, boolean isFavourite) {
-        passwordDao.updateFavourite(timeStamp, isFavourite);
+    public Call<SavePasswordResponse> updateFavourite(FavouriteRequest favouriteRequest) {
+        return passwordApiService.favouritePassword(favouriteRequest);
+    }
+
+    public void updateFavouriteDB(long timeStamp, boolean isFavourite) {
+        passwordDao.updateFavouriteDB(timeStamp, isFavourite);
     }
 }

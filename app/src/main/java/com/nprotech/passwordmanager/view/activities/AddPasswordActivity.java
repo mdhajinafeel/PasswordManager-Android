@@ -273,7 +273,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     etApplicationName.setText(passwordEntity.getApplicationName());
                     etUserName.setText(passwordEntity.getApplicationName());
                     etApplicationLink.setText(passwordEntity.getLink());
-                    etPassword.setText(CryptoHelper.decrypt(CommonUtils.getPasswordAlias(), passwordEntity.getPassword()));
+                    etPassword.setText(CryptoHelper.decrypt(passwordEntity.getPassword()));
                     isCustomIcon = passwordEntity.isCustomIcon();
                     categoryId = passwordEntity.getCategory();
                     iconId = passwordEntity.getIconId();
@@ -421,7 +421,7 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                 passwordEntity.setUserName(Objects.requireNonNull(etUserName.getText()).toString());
                 passwordEntity.setLink(Objects.requireNonNull(etApplicationLink.getText()).toString());
                 passwordEntity.setCategory(categoryId);
-                passwordEntity.setPassword(CryptoHelper.encrypt(CommonUtils.getPasswordAlias(), etPassword.getText().toString()));
+                passwordEntity.setPassword(CryptoHelper.encrypt(etPassword.getText().toString()));
                 passwordEntity.setIcon(imgPasswordIconArray);
                 passwordEntity.setCustomIcon(isCustomIcon);
                 passwordEntity.setIconId(iconId);
@@ -531,23 +531,28 @@ public class AddPasswordActivity extends BaseActivity implements View.OnClickLis
                     passwordStrength = CommonUtils.passwordWeak;
                     break;
                 case 2:
-                case 3:
                     color = ContextCompat.getColor(this, R.color.mediumColor);
                     label = getString(R.string.medium);
                     widthPercent = 0.5f;
                     passwordStrength = CommonUtils.passwordMedium;
                     break;
-                case 4:
+                case 3:
                     color = ContextCompat.getColor(this, R.color.strongColor);
                     label = getString(R.string.strong);
                     widthPercent = 0.75f;
                     passwordStrength = CommonUtils.passwordStrong;
                     break;
-                default:
+                case 4:
                     color = ContextCompat.getColor(this, R.color.veryStrongColor);
                     label = getString(R.string.very_strong);
                     widthPercent = 1f;
                     passwordStrength = CommonUtils.passwordVeryStrong;
+                    break;
+                default:
+                    color = ContextCompat.getColor(this, R.color.weakColor);
+                    label = getString(R.string.weak);
+                    widthPercent = 1f;
+                    passwordStrength = CommonUtils.passwordWeak;
                     break;
             }
 

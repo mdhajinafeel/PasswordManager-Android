@@ -33,8 +33,8 @@ import com.nprotech.passwordmanager.common.BaseActivity;
 import com.nprotech.passwordmanager.db.entities.CategoryEntity;
 import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.model.PasswordModel;
+import com.nprotech.passwordmanager.model.request.FavouriteRequest;
 import com.nprotech.passwordmanager.utils.AppLogger;
-import com.nprotech.passwordmanager.utils.CommonUtils;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
 import com.nprotech.passwordmanager.view.adapter.ViewHolder;
 import com.nprotech.passwordmanager.viewmodel.MasterViewModel;
@@ -49,7 +49,7 @@ public class CategoryPasswordActivity extends BaseActivity {
 
     private PasswordViewModel passwordViewModel;
     private RecyclerView rvPasswordList;
-    private FrameLayout frameNoData;
+    private FrameLayout frameNoData, progressBar;
     private CommonRecyclerViewAdapter<PasswordModel> passwordEntityCommonRecyclerViewAdapter;
     private RecyclerView.ViewHolder currentSwipedHolder;
     private int categoryId;
@@ -80,6 +80,7 @@ public class CategoryPasswordActivity extends BaseActivity {
             AppCompatImageView icBack = findViewById(R.id.icBack);
             rvPasswordList = findViewById(R.id.rvPasswordList);
             frameNoData = findViewById(R.id.frameNoData);
+            progressBar = findViewById(R.id.progressBar);
 
             MasterViewModel masterViewModel = new ViewModelProvider(this).get(MasterViewModel.class);
             passwordViewModel = new ViewModelProvider(this).get(PasswordViewModel.class);
@@ -95,6 +96,14 @@ public class CategoryPasswordActivity extends BaseActivity {
                 txtTitle.setText(categoryEntity.getCategoryName());
 
                 icBack.setOnClickListener(v -> finish());
+
+                passwordViewModel.getProgressState().observe(this, isProgress -> {
+                    if (isProgress) {
+                        showProgress(progressBar);  // call showProgress
+                    } else {
+                        hideProgress(progressBar);  // call hideProgress
+                    }
+                });
 
                 fetchPasswordsByCategory(passwordList);
             } else {
@@ -117,9 +126,10 @@ public class CategoryPasswordActivity extends BaseActivity {
                             holder.setViewText(R.id.tvApplicationName, item.getApplicationName());
                             holder.setViewText(R.id.tvUsername, item.getUserName());
 
-                            String decryptedPassword = CryptoHelper.decrypt(CommonUtils.getPasswordAlias(), item.getPassword());
                             AppCompatTextView tvPassword = holder.getView(R.id.tvPassword);
                             tvPassword.setText("••••••••");
+
+                            String decryptedPassword = CryptoHelper.decrypt(item.getPassword());
 
                             // Password Toggle
                             AppCompatCheckBox cbTogglePassword = holder.getView(R.id.cbTogglePassword);
@@ -140,8 +150,12 @@ public class CategoryPasswordActivity extends BaseActivity {
                             // Favourite
                             AppCompatCheckBox cbFavorite = holder.getView(R.id.cbFavorite);
                             cbFavorite.setChecked(item.isFavourite());
-                            cbFavorite.setOnCheckedChangeListener((buttonView, isChecked) ->
-                                    passwordViewModel.updateFavourite(item.getTimeStamp(), isChecked));
+                            cbFavorite.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                                FavouriteRequest favouriteRequest = new FavouriteRequest();
+                                favouriteRequest.setTimeStamp(item.getTimeStamp());
+                                favouriteRequest.setFavourite(isChecked);
+                                passwordViewModel.favouritePassword(favouriteRequest);
+                            });
 
                             // Copy Password
                             holder.getView(R.id.ivCopyPassword).setOnClickListener(v -> {

@@ -283,6 +283,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                     loginViewModel.getLoginResult().observe(this, loginResponse -> {
 
+                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                         PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
                         PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
                         PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
@@ -291,7 +292,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
                         PreferenceManager.INSTANCE.setLoggedIn(true);
                         PreferenceManager.INSTANCE.setGoogleSignIn(false);
-                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                         PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                         startActivity(new Intent(this, MainActivity.class)
@@ -362,6 +362,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                     loginViewModel.getLoginResult().observe(this, loginResponse -> {
 
+                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                         PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
                         PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
                         PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
@@ -370,7 +371,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
                         PreferenceManager.INSTANCE.setLoggedIn(true);
                         PreferenceManager.INSTANCE.setGoogleSignIn(false);
-                        PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                         PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                         startActivity(new Intent(this, MainActivity.class)
@@ -460,6 +460,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                             loginViewModel.getLoginResult().observe(this, loginResponse -> {
 
+                                PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                                 PreferenceManager.INSTANCE.setAccessToken(loginResponse.getAccessToken());
                                 PreferenceManager.INSTANCE.setLoginExpiry(loginResponse.getLoginExpiresAt());
                                 PreferenceManager.INSTANCE.setRefreshToken(loginResponse.getRefreshToken());
@@ -468,7 +469,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 PreferenceManager.INSTANCE.setEmail(loginResponse.getUser().getEmail());
                                 PreferenceManager.INSTANCE.setLoggedIn(true);
                                 PreferenceManager.INSTANCE.setGoogleSignIn(true);
-                                PreferenceManager.INSTANCE.setSecretKey(loginResponse.getUser().getSecretKey());
                                 PreferenceManager.INSTANCE.setRememberMe(isRememberMe);
 
                                 startActivity(new Intent(this, MainActivity.class)

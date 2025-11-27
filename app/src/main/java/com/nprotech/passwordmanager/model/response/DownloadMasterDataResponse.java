@@ -8,6 +8,7 @@ public class DownloadMasterDataResponse implements Serializable {
 
     private List<CategoriesResponse> categories;
     private List<IconsResponse> icons;
+    private List<PasswordResponse> passwords;
 
     public List<CategoriesResponse> getCategories() {
         return categories;
@@ -15,5 +16,9 @@ public class DownloadMasterDataResponse implements Serializable {
 
     public List<IconsResponse> getIcons() {
         return icons;
+    }
+
+    public List<PasswordResponse> getPasswords() {
+        return passwords;
     }
 }

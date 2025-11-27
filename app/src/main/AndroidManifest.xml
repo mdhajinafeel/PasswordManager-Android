@@ -25,6 +25,11 @@
         android:name="android.permission.READ_MEDIA_IMAGES"
         android:required="false"
         tools:ignore="PhotoAndVideoPolicy" />
+    <uses-permission
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        android:required="false"
+        tools:ignore="PhotoAndVideoPolicy" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <!-- For Android 14+ (Selected Photos Access) -->
     <uses-permission
@@ -40,13 +45,18 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- Needed for Downloads folder on Android 10+ -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="AllFilesAccessPolicy,ScopedStorage" />
+
     <application
         android:name=".MyPasswordManagerApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PasswordManager"

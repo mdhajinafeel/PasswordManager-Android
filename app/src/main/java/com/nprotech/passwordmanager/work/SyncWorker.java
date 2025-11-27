@@ -68,7 +68,7 @@ public class SyncWorker extends Worker {
                     .create(IMasterApiService.class);
 
             AppDatabase db = AppDatabase.getInstance(getApplicationContext());
-            MasterRepository masterRepository = new MasterRepository(apiService, db.categoryDao(), db.iconDao(), db.schedulerDao());
+            MasterRepository masterRepository = new MasterRepository(apiService, db.categoryDao(), db.iconDao(), db.schedulerDao(), db.passwordDao());
 
             masterRepository.masterDownload();
             AppLogger.d(getClass(), "✅ Sync successful");
@@ -103,7 +103,7 @@ public class SyncWorker extends Worker {
 
                 AppDatabase db = AppDatabase.getInstance(context);
                 MasterRepository masterRepository = new MasterRepository(apiService,
-                        db.categoryDao(), db.iconDao(), db.schedulerDao());
+                        db.categoryDao(), db.iconDao(), db.schedulerDao(), db.passwordDao());
 
                 AppLogger.d(context.getClass(), "⬇️ Clearing Scheduler Data");
                 db.schedulerDao().clearAll();

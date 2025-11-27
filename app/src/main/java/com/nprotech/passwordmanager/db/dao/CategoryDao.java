@@ -20,7 +20,7 @@ public interface CategoryDao {
      * Get all categories from the table.
      * @return all categories.
      */
-    @Query("SELECT c.id, C.iconText, C.categoryName, C.colorCode, COUNT(p.id) AS passwordCount FROM categories c " +
+    @Query("SELECT c.id, C.iconText, C.categoryName, C.colorCode, COUNT(p.timeStamp) AS passwordCount FROM categories c " +
             "LEFT JOIN passwords p ON p.category = c.id " +
             "GROUP BY c.id " +
             "ORDER BY c.id ASC")
