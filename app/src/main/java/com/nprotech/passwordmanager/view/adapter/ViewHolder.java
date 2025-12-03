@@ -41,9 +41,8 @@ public class ViewHolder extends RecyclerView.ViewHolder {
         return this;
     }
 
-    public ViewHolder setViewTextColor(int viewId, int color) {
+    public void setViewTextColor(int viewId, int color) {
         ReflectHelper.invokeMethodIfExists("setTextColor", getView(viewId), new Class[]{int.class}, color);
-        return this;
     }
 
     public ViewHolder setViewTextSize(int viewId, float size) {

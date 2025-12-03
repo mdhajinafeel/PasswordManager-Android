@@ -11,10 +11,12 @@ import androidx.lifecycle.ViewModel;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.db.entities.CategoryEntity;
 import com.nprotech.passwordmanager.db.entities.IconEntity;
+import com.nprotech.passwordmanager.db.entities.PasswordEntity;
 import com.nprotech.passwordmanager.model.response.CategoriesResponse;
 import com.nprotech.passwordmanager.model.response.DownloadMasterDataResponse;
 import com.nprotech.passwordmanager.model.response.DownloadMasterResponse;
 import com.nprotech.passwordmanager.model.response.IconsResponse;
+import com.nprotech.passwordmanager.model.response.PasswordResponse;
 import com.nprotech.passwordmanager.repositories.MasterRepository;
 
 import java.util.ArrayList;
@@ -58,19 +60,9 @@ public class MasterViewModel extends ViewModel {
                         List<CategoriesResponse> categoriesResponse = downloadMasterDataResponse.getCategories();
                         if (categoriesResponse != null && !categoriesResponse.isEmpty()) {
 
-                            masterRepository.deleteCategories();
-
-                            List<CategoryEntity> categoryEntityList = new ArrayList<>();
-                            for (CategoriesResponse category : categoriesResponse) {
-                                CategoryEntity categoryEntity = new CategoryEntity();
-                                categoryEntity.setId(category.getId());
-                                categoryEntity.setCategoryName(category.getCategoryName());
-                                categoryEntity.setIconText(category.getIconText());
-
-                                categoryEntityList.add(categoryEntity);
-                            }
-
+                            List<CategoryEntity> categoryEntityList = masterRepository.mapCategoriesToEntities(categoriesResponse);
                             if (!categoryEntityList.isEmpty()) {
+                                masterRepository.deleteCategories();
                                 masterRepository.insertCategories(categoryEntityList);
                             }
                         }
@@ -91,6 +83,17 @@ public class MasterViewModel extends ViewModel {
 
                             if (!iconEntityList.isEmpty()) {
                                 masterRepository.insertIcons(iconEntityList);
+                            }
+                        }
+
+                        List<PasswordResponse> passwordResponses = downloadMasterDataResponse.getPasswords();
+                        if(passwordResponses != null && !passwordResponses.isEmpty()) {
+
+                            List<PasswordEntity> passwordEntityList = masterRepository.mapPasswordsToEntities(passwordResponses);
+
+                            if(!passwordEntityList.isEmpty()) {
+                                masterRepository.deletePasswords();
+                                masterRepository.insertPasswords(passwordEntityList);
                             }
                         }
                     }

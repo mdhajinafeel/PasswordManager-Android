@@ -42,6 +42,10 @@ public class PasswordRepository {
         return passwordDao.getPasswordsFavorites();
     }
 
+    public LiveData<List<PasswordModel>> getPasswordsFavoritesLive() {
+        return passwordDao.getPasswordsFavoritesLive();
+    }
+
     public PasswordModel getPasswordModel(long timeStamp) {
         return passwordDao.getPasswordModel(timeStamp);
     }

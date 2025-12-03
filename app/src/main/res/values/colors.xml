@@ -35,8 +35,6 @@
     <color name="colorVeryDimBlue">#F2F7FF</color>
     <color name="colorErrorRed">#D32F2F</color>
     <color name="colorMilkWhite">#F8F8FF</color>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
 
     <color name="weakColor">#F44336</color>
     <color name="mediumColor">#FF9800</color>

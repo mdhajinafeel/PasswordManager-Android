@@ -111,6 +111,7 @@
     <string name="no_passwords_found">No passwords found</string>
     <string name="passwords">Passwords</string>
     <string name="unable_to_create_folder">Unable to create folder!</string>
+    <string name="no_data_found">No data found</string>
 
     <plurals name="password_count">
         <item quantity="one">%d Password</item>

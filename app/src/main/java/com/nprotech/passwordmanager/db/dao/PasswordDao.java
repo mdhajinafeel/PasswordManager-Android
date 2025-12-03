@@ -61,6 +61,15 @@ public interface PasswordDao {
             "ORDER BY pwd.databaseId DESC")
     List<PasswordModel> getPasswordsFavorites();
 
+    @Query("SELECT pwd.link AS applicationLink, pwd.passwordStrength AS passwordStrength, pwd.databaseId AS databaseId, pwd.timeStamp AS timeStamp, pwd.applicationName AS applicationName, pwd.userName AS userName, pwd.password AS password, pwd.iconId AS iconId," +
+            "pwd.isCustomIcon AS isCustomIcon, pwd.isFavourite AS isFavourite, pwd.category AS categoryId, ctg.categoryName AS category," +
+            "CASE WHEN pwd.isCustomIcon = 1 THEN pwd.icon ELSE icn.icon END AS icon " +
+            "FROM passwords pwd " +
+            "INNER JOIN categories ctg ON ctg.id = pwd.category " +
+            "LEFT JOIN icons icn ON icn.id = pwd.iconId WHERE isFavourite = 1 " +
+            "ORDER BY pwd.databaseId DESC")
+    LiveData<List<PasswordModel>> getPasswordsFavoritesLive();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insertPassword(PasswordEntity passwords);
 

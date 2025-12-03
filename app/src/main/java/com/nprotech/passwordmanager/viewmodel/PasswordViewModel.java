@@ -113,6 +113,10 @@ public class PasswordViewModel extends ViewModel {
         return passwordRepository.getPasswordsFavorites();
     }
 
+    public LiveData<List<PasswordModel>> getPasswordsFavoritesLive() {
+        return passwordRepository.getPasswordsFavoritesLive();
+    }
+
     /**
      * Gets a password by its categoryId.
      *

@@ -113,7 +113,7 @@ public class MasterRepository {
         }
     }
 
-    private List<CategoryEntity> mapCategoriesToEntities(List<CategoriesResponse> categoriesResponse) {
+    public List<CategoryEntity> mapCategoriesToEntities(List<CategoriesResponse> categoriesResponse) {
         List<CategoryEntity> categoryEntityList = new ArrayList<>();
 
         if (categoriesResponse == null || categoriesResponse.isEmpty()) {
@@ -133,7 +133,7 @@ public class MasterRepository {
         return categoryEntityList;
     }
 
-    private List<PasswordEntity> mapPasswordsToEntities(List<PasswordResponse> passwordResponses) {
+    public List<PasswordEntity> mapPasswordsToEntities(List<PasswordResponse> passwordResponses) {
         List<PasswordEntity> passwordEntityList = new ArrayList<>();
         for (PasswordResponse passwordResponse : passwordResponses) {
             PasswordEntity passwordEntity = new PasswordEntity();

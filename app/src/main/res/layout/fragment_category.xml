@@ -80,7 +80,7 @@
             android:layout_gravity="bottom|center_horizontal"
             android:fontFamily="@font/exo2_semibold"
             android:text="@string/no_categories_available"
-            android:textColor="@color/black"
+            android:textColor="@color/colorBlack"
             android:textSize="@dimen/text_18" />
 
     </FrameLayout>

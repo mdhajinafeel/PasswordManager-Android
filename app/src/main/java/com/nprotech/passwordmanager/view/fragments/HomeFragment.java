@@ -13,17 +13,22 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
@@ -35,8 +40,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.nprotech.passwordmanager.R;
 import com.nprotech.passwordmanager.helper.CryptoHelper;
 import com.nprotech.passwordmanager.model.PasswordModel;
+import com.nprotech.passwordmanager.model.PasswordStrength;
 import com.nprotech.passwordmanager.model.request.FavouriteRequest;
 import com.nprotech.passwordmanager.utils.AppLogger;
+import com.nprotech.passwordmanager.utils.CommonUtils;
 import com.nprotech.passwordmanager.view.activities.AddPasswordActivity;
 import com.nprotech.passwordmanager.view.activities.MainActivity;
 import com.nprotech.passwordmanager.view.adapter.CommonRecyclerViewAdapter;
@@ -45,17 +52,21 @@ import com.nprotech.passwordmanager.viewmodel.PasswordViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
 
-    private RecyclerView rvPasswordList;
+    private AppCompatEditText etSearch;
+    private RecyclerView rvPasswordStrengthType, rvPasswordList;
+    private AppCompatTextView tvNoDataFound;
     private PasswordViewModel passwordViewModel;
     private FrameLayout frameNoData;
     private CommonRecyclerViewAdapter<PasswordModel> passwordEntityCommonRecyclerViewAdapter;
     private RecyclerView.ViewHolder currentSwipedHolder;
+    private int selectedStrength = -1;   // -1 = nothing selected
 
     public static HomeFragment getInstance() {
         return new HomeFragment();
@@ -68,6 +79,9 @@ public class HomeFragment extends Fragment {
         try {
             AppCompatTextView txtTitle = view.findViewById(R.id.txtTitle);
             AppCompatImageView ivAddPassword = view.findViewById(R.id.ivAddPassword);
+            tvNoDataFound = view.findViewById(R.id.tvNoDataFound);
+            etSearch = view.findViewById(R.id.etSearch);
+            rvPasswordStrengthType = view.findViewById(R.id.rvPasswordStrengthType);
             rvPasswordList = view.findViewById(R.id.rvPasswordList);
             frameNoData = view.findViewById(R.id.frameNoData);
 
@@ -105,6 +119,9 @@ public class HomeFragment extends Fragment {
             passwordViewModel.getPasswordModelLiveData().observe(getViewLifecycleOwner(), passwordModels -> {
                 List<PasswordModel> passwordList = new ArrayList<>(passwordModels);
                 if (!passwordList.isEmpty()) {
+
+                    fetchPasswordStrengthType();
+
                     passwordEntityCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(requireContext(), passwordList,
                             R.layout.row_item_passwords) {
                         @Override
@@ -222,16 +239,136 @@ public class HomeFragment extends Fragment {
                     };
 
                     rvPasswordList.setAdapter(passwordEntityCommonRecyclerViewAdapter);
+                    etSearch.setVisibility(View.VISIBLE);
                     rvPasswordList.setVisibility(View.VISIBLE);
                     frameNoData.setVisibility(View.GONE);
                     setupSwipeToReveal();
+
+                    etSearch.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                        }
+
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            applyCombinedFilter();
+                        }
+                    });
                 } else {
+                    etSearch.setVisibility(View.GONE);
                     rvPasswordList.setVisibility(View.GONE);
+                    rvPasswordStrengthType.setVisibility(View.GONE);
                     frameNoData.setVisibility(View.VISIBLE);
                 }
             });
         } catch (Exception e) {
             AppLogger.e(getInstance().getClass(), "Error fetchPasswords", e);
+        }
+    }
+
+    private void fetchPasswordStrengthType() {
+        try {
+
+            List<PasswordStrength> passwordStrengthList = new ArrayList<>();
+            passwordStrengthList.add(new PasswordStrength(
+                    CommonUtils.passwordWeak,
+                    ContextCompat.getColor(requireContext(), R.color.weakColor),
+                    getString(R.string.weak),
+                    R.drawable.bg_rectangle_weak_border,
+                    R.drawable.bg_rectangle_weak_border_dark
+            ));
+
+            passwordStrengthList.add(new PasswordStrength(
+                    CommonUtils.passwordMedium,
+                    ContextCompat.getColor(requireContext(), R.color.mediumColor),
+                    getString(R.string.medium),
+                    R.drawable.bg_rectangle_medium_border,
+                    R.drawable.bg_rectangle_medium_border_dark
+            ));
+
+            passwordStrengthList.add(new PasswordStrength(
+                    CommonUtils.passwordStrong,
+                    ContextCompat.getColor(requireContext(), R.color.strongColor),
+                    getString(R.string.strong),
+                    R.drawable.bg_rectangle_strong_border,
+                    R.drawable.bg_rectangle_strong_border_dark
+            ));
+
+            passwordStrengthList.add(new PasswordStrength(
+                    CommonUtils.passwordVeryStrong,
+                    ContextCompat.getColor(requireContext(), R.color.veryStrongColor),
+                    getString(R.string.very_strong),
+                    R.drawable.bg_rectangle_verystrong_border,
+                    R.drawable.bg_rectangle_verystrong_border_dark
+            ));
+
+            CommonRecyclerViewAdapter<PasswordStrength> passwordStrengthCommonRecyclerViewAdapter = new CommonRecyclerViewAdapter<>(requireContext(),
+                    passwordStrengthList, R.layout.row_item_passwordstrength) {
+
+                // ⬇️ ⬇️ ADD HELPER METHODS HERE ⬇️ ⬇️
+                private void setBackground(View view, @DrawableRes int resId) {
+                    view.setBackgroundResource(resId);
+                    view.setTag(R.id.tag_bg_res_id, resId);
+                }
+                // ⬆️ ⬆️ HELPER METHODS END ⬆️ ⬆️
+
+                @Override
+                public void onPostBindViewHolder(@NonNull ViewHolder holder, @NonNull PasswordStrength item) {
+
+                    // your binding code here
+                    RelativeLayout rlPasswordStrength = holder.getView(R.id.rlPasswordStrength);
+
+                    int normalBg = item.getBackgroundResNormal();
+                    int darkBg = item.getBackgroundResDark();
+
+                    // set initial background using helper
+                    if (item.getStrengthType() == selectedStrength) {
+                        setBackground(rlPasswordStrength, darkBg);
+                    } else {
+                        setBackground(rlPasswordStrength, normalBg);
+                    }
+
+                    holder.setViewText(R.id.tvStrengthLabel, item.getStrengthLabel());
+                    holder.setViewTextColor(R.id.tvStrengthLabel, item.getColor());
+
+                    View viewStrengthIndicator = holder.getView(R.id.viewStrengthIndicator);
+                    Drawable drawable = viewStrengthIndicator.getBackground();
+                    if (drawable instanceof GradientDrawable) {
+                        GradientDrawable gd = (GradientDrawable) drawable.mutate();
+                        gd.setColor(item.getColor());
+                        viewStrengthIndicator.setBackground(gd);
+                    }
+
+                    rlPasswordStrength.setOnClickListener(v -> {
+
+                        boolean isSelected = (item.getStrengthType() == selectedStrength);
+
+                        if (isSelected) {
+                            selectedStrength = -1;
+                            setBackground(rlPasswordStrength, normalBg);
+                            notifyDataSetChanged();
+                            applyCombinedFilter();
+                            return;
+                        }
+
+                        selectedStrength = item.getStrengthType();
+                        setBackground(rlPasswordStrength, darkBg);
+                        notifyDataSetChanged();
+                        applyCombinedFilter();
+                    });
+                }
+            };
+
+            rvPasswordStrengthType.setAdapter(passwordStrengthCommonRecyclerViewAdapter);
+            rvPasswordStrengthType.setVisibility(View.VISIBLE);
+        } catch (Exception e) {
+            AppLogger.e(getClass(), "Error fetchPasswordStrengthType", e);
         }
     }
 
@@ -338,4 +475,34 @@ public class HomeFragment extends Fragment {
                     }
                 }
             });
+
+    private void applyCombinedFilter() {
+        String searchText = Objects.requireNonNull(etSearch.getText()).toString().trim().toLowerCase();
+
+        List<PasswordModel> source = passwordViewModel.getPasswords();
+        List<PasswordModel> result = new ArrayList<>();
+
+        for (PasswordModel model : source) {
+
+            boolean matchesSearch =
+                    model.getApplicationName().toLowerCase().contains(searchText) ||
+                            model.getUserName().toLowerCase().contains(searchText);
+
+            boolean matchesStrength =
+                    (selectedStrength == -1) ||  // nothing selected → allow all
+                            (model.getPasswordStrength() == selectedStrength);
+
+            if (matchesSearch && matchesStrength) {
+                result.add(model);
+            }
+        }
+
+        if (result.isEmpty()) {
+            tvNoDataFound.setVisibility(View.VISIBLE);
+        } else {
+            tvNoDataFound.setVisibility(View.GONE);
+        }
+
+        passwordEntityCommonRecyclerViewAdapter.updateData(result);
+    }
 }

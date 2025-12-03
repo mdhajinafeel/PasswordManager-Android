@@ -69,5 +69,7 @@ public class SyncScheduler {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
         if (alarmManager != null) alarmManager.cancel(pendingIntent);
+
+        AppLogger.d(context.getClass(), "❌ Scheduled cancelled");
     }
 }
